@@ -13,7 +13,7 @@ Route::get('dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::apiResource('images', ImageController::class)
-    ->only(['index', 'store', 'destroy'])
+    ->only(['index', 'store', 'show', 'destroy'])
     ->middleware(['auth', 'verified'])->names('images');
 
 Route::get('images/{image}/preview', [ImageController::class, 'preview'])

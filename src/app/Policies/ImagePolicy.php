@@ -36,7 +36,7 @@ class ImagePolicy
      */
     public function update(User $user, Image $image): bool
     {
-        return false;
+        return $user->id === $image->user_id;
     }
 
     /**

@@ -11,7 +11,6 @@ class Image extends Model
         'name',
         'width',
         'height',
-        'original_path',
         'user_id',
 
         'iptc_object_attribute_reference',
@@ -35,6 +34,10 @@ class Image extends Model
         'iptc_caption_abstract',
         'iptc_writer_editor',
         'iptc_application_record_version'
+    ];
+
+    protected $hidden = [
+        'original_path'
     ];
 
     protected $appends = ['preview_url'];
