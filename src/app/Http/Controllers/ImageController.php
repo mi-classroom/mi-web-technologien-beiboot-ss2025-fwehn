@@ -134,7 +134,17 @@ class ImageController extends Controller
         ]);
 
         $image->update($validated);
-        return redirect()->back();
+        return redirect()->route('images.show', $image);
+    }
+
+    public function export(Image $image)
+    {
+        ExifToolService::write(Storage::path($image->original_path), $image->iptc());
+
+        return Storage::disk('public')->download(
+            $image->original_path,
+            $image->name . '.' . pathinfo($image->original_path, PATHINFO_EXTENSION)
+        );
     }
 
     /**

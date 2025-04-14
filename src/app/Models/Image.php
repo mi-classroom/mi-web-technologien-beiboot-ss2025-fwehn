@@ -12,6 +12,7 @@ class Image extends Model
         'width',
         'height',
         'user_id',
+        'original_path',
 
         'iptc_object_attribute_reference',
         'iptc_object_name',
@@ -36,10 +37,6 @@ class Image extends Model
         'iptc_application_record_version'
     ];
 
-    protected $hidden = [
-        'original_path'
-    ];
-
     protected $appends = ['preview_url'];
 
     public function getPreviewUrlAttribute(): string
@@ -50,5 +47,12 @@ class Image extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function iptc(): array
+    {
+        return collect($this->attributes)
+            ->filter(fn($_, $key) => str_starts_with($key, 'iptc_'))
+            ->toArray();
     }
 }

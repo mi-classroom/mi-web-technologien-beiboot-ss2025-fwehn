@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { Plus, Trash2 } from 'lucide-vue-next';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Pencil, Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Images', href: '/images' }];
@@ -58,7 +58,7 @@ const handleDragLeave = (e: DragEvent) => {
         >
             <div
                 v-if="isDragging || props.images.length === 0"
-                class="drop-overlay pointer-events-auto absolute inset-0 z-40 flex items-center justify-center rounded-xl border-4 border-dashed text-2xl font-semibold text-primary bg-background"
+                class="drop-overlay pointer-events-auto absolute inset-0 z-40 flex items-center justify-center rounded-xl border-4 border-dashed bg-background text-2xl font-semibold text-primary"
             >
                 Datei hierher ziehen zum Hochladen
             </div>
@@ -82,30 +82,31 @@ const handleDragLeave = (e: DragEvent) => {
             <div class="fixed bottom-8 right-8 z-50">
                 <button
                     type="button"
-                    class="rounded-full p-4 shadow-lg transition-all bg-primary text-accent"
+                    class="rounded-full bg-primary p-4 text-accent shadow-lg transition-all"
                     @click="fileInput?.click()"
                     :disabled="form.processing"
                 >
                     <Plus />
                 </button>
 
-                <div v-if="form.errors.image" class="mt-2 text-sm bg-destructive">
+                <div v-if="form.errors.image" class="mt-2 bg-destructive text-sm">
                     {{ form.errors.image }}
                 </div>
             </div>
 
             <div v-if="props.images.length > 0" class="mt-4 flex flex-wrap items-center justify-center gap-4">
-                <div v-for="image in props.images" :key="image.id" class="group relative h-60 w-60 shadow">
-                    <button
-                        type="button"
-                        class="absolute -right-3 -top-3 hidden items-center justify-center rounded-full bg-destructive p-2 text-destructive-foreground shadow-lg transition-all hover:scale-110 group-hover:flex"
-                        @click="router.delete(route('images.destroy', image.id))"
-                    >
-                        <Trash2 />
-                    </button>
+                <Link
+                    v-for="image in props.images"
+                    :key="image.id"
+                    :href="route('images.show', image.id)"
+                    class="group relative h-60 w-60 shadow"
+                >
+                    <span class="absolute -right-3 -top-3 hidden items-center justify-center rounded-full bg-secondary p-2 text-secondary-foreground shadow-lg transition-all hover:scale-110 group-hover:flex">
+                        <Pencil />
+                    </span>
 
                     <img :src="image.preview_url" :alt="image.name" class="h-full w-full rounded-lg object-cover" />
-                </div>
+                </Link>
             </div>
         </form>
     </AppLayout>
