@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->integer('height');
             $table->string('original_path');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('folder_id')->nullable()->constrained()->onDelete('cascade');
 
             $table->string('iptc_object_attribute_reference')->nullable();
             $table->string('iptc_object_name')->nullable();

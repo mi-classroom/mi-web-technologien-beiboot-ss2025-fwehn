@@ -14,10 +14,12 @@ class ImageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        $images = Image::latest()->where('user_id', auth()->id())->get();
+
         return Inertia::render('image/Index', [
-            'images' => Image::latest()->where('user_id', auth()->id())->get(),
+            'images' => $images,
         ]);
     }
 
@@ -35,30 +37,32 @@ class ImageController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image' => 'required|image',
+            'images' => 'required|array',
+            'images.*' => 'image',
         ]);
 
-        $file = $request->file('image');
-        $filename = time() . '_' . $file->getClientOriginalName();
+        foreach ($request->file('images') as $file) {
+            $filename = time() . '_' . $file->getClientOriginalName();
 
-        $path = $file->storeAs('originals', $filename);
+            $path = $file->storeAs('originals', $filename);
 
-        $imageSize = getimagesize($file->getPathname());
-        $width = $imageSize[0];
-        $height = $imageSize[1];
+            $imageSize = getimagesize($file->getPathname());
+            $width = $imageSize[0];
+            $height = $imageSize[1];
 
-        $iptc = ExifToolService::read(Storage::path($path));
+            $iptc = ExifToolService::read(Storage::path($path));
 
-        Image::create(array_merge(
-            [
-                'name' => $filename,
-                'width' => $width,
-                'height' => $height,
-                'original_path' => $path,
-                'user_id' => auth()->id(),
-            ],
-            $iptc
-        ));
+            Image::create(array_merge(
+                [
+                    'name' => $filename,
+                    'width' => $width,
+                    'height' => $height,
+                    'original_path' => $path,
+                    'user_id' => auth()->id(),
+                ],
+                $iptc
+            ));
+        }
 
         return redirect()->route('images.index');
     }

@@ -12,9 +12,10 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Instrument Sans', ...defaultTheme.fontFamily.sans],
+                sans: ['Spline Sans', ...defaultTheme.fontFamily.sans],
             },
             borderRadius: {
+                DEFAULT: '4px',
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
                 sm: 'calc(var(--radius) - 4px)',
@@ -70,7 +71,48 @@ export default {
                     border: 'hsl(var(--sidebar-border))',
                     ring: 'hsl(var(--sidebar-ring))',
                 },
+                warm: {
+                    light: '#EBE9E0',
+                    medium: '#A4A195',
+                    dark: '#4C4B45',
+                },
+                dark: {
+                    DEFAULT: '#666666'
+                },
+                darker: {
+                    DEFAULT: '#333333'
+                },
+                darkest: {
+                    DEFAULT: '#000000'
+                },
+                darken: {
+                    DEFAULT: '#000000CC'
+                },
+                light: {
+                    DEFAULT: '#F4F4F4'
+                },
+                lightest: {
+                    DEFAULT: '#FFFFFF'
+                },
+                lighten: {
+                    DEFAULT: '#FFFFFFCC'
+                }
             },
+            spacing: {
+                '3xs': '5px',
+                'xxs': '10px',
+                'xs': '12xp',
+                's': '16px',
+                'm': '20px',
+                'l': '25px',
+                'xl': '32px',
+                'xxl': '40px',
+            },
+            borderWidth: {
+                'xs': '0.5px',
+                's': '1px',
+                'm': '2px'
+            }
         },
     },
     plugins: [require('tailwindcss-animate')],
