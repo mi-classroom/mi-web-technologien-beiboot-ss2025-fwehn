@@ -55,7 +55,12 @@ const submit = () => {
                 <div class="grid gap-2">
                     <div class="flex items-center justify-between">
                         <Label for="password">Password</Label>
-                        <TextLink v-if="canResetPassword" :href="route('password.request')" class="text-sm" :tabindex="5">
+                        <TextLink
+                            v-if="canResetPassword"
+                            :href="route('password.request')"
+                            class="text-sm"
+                            :tabindex="5"
+                        >
                             Forgot password?
                         </TextLink>
                     </div>
@@ -84,7 +89,7 @@ const submit = () => {
                 </Button>
             </div>
 
-            <div class="text-center text-sm text-muted-foreground">
+            <div class="text-muted-foreground text-center text-sm">
                 Don't have an account?
                 <TextLink :href="route('register')" :tabindex="5">Sign up</TextLink>
             </div>

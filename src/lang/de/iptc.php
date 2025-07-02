@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'iptc_object_attribute_reference' => 'Objektattribut-Referenz',
+    'iptc_object_name' => 'Objektname',
+    'iptc_subject_reference' => 'Themen-Referenz',
+    'iptc_special_instructions' => 'Besondere Anweisungen',
+    'iptc_date_created' => 'Erstellungsdatum',
+    'iptc_time_created' => 'Erstellungszeit',
+    'iptc_byline' => 'Autor',
+    'iptc_byline_title' => 'Autorentitel',
+    'iptc_city' => 'Stadt',
+    'iptc_sub_location' => 'Teilort',
+    'iptc_province_state' => 'Bundesland/Region',
+    'iptc_country_primary_location_code' => 'Ländercode',
+    'iptc_country_primary_location_name' => 'Land',
+    'iptc_original_transmission_reference' => 'Ursprüngliche Übertragungsreferenz',
+    'iptc_headline' => 'Überschrift',
+    'iptc_credit' => 'Urheber',
+    'iptc_source' => 'Quelle',
+    'iptc_copyright_notice' => 'Urheberrechtshinweis',
+    'iptc_caption_abstract' => 'Bildbeschreibung',
+    'iptc_writer_editor' => 'Redakteur/Autor',
+    'iptc_application_record_version' => 'IPTC-Versionsnummer',
+];

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ImageRequest;
+use Intervention\Image\Facades\Image as InterventionImage;
 use App\Models\Image;
 use App\Services\ExifToolService;
 use Illuminate\Http\Request;
@@ -42,9 +44,7 @@ class ImageController extends Controller
         ]);
 
         foreach ($request->file('images') as $file) {
-            $filename = time() . '_' . $file->getClientOriginalName();
-
-            $path = $file->storeAs('originals', $filename);
+            $path = $file->storeAs('originals', time() . '_' . $file->getClientOriginalName());
 
             $imageSize = getimagesize($file->getPathname());
             $width = $imageSize[0];
@@ -54,7 +54,7 @@ class ImageController extends Controller
 
             Image::create(array_merge(
                 [
-                    'name' => $filename,
+                    'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
                     'width' => $width,
                     'height' => $height,
                     'original_path' => $path,
@@ -91,9 +91,7 @@ class ImageController extends Controller
      */
     public function show(Image $image)
     {
-        return Inertia::render('image/Show', [
-            "image" => $image,
-        ]);
+        //
     }
 
     /**
@@ -101,54 +99,84 @@ class ImageController extends Controller
      */
     public function edit(Image $image)
     {
-        //
+        return Inertia::render('image/Edit', [
+            "image" => $image,
+        ]);
+    }
+
+    public function editSelection()
+    {
+        return Inertia::render('image/EditSelection', [
+            "image" => Image::inRandomOrder()->first(),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Image $image)
+    public function update(ImageRequest $request, Image $image)
     {
-        Gate::authorize('update', $image);
-
-        $validated = $request->validate([
-            'name' => 'required|string',
-
-            'iptc_object_attribute_reference' => 'nullable|string',
-            'iptc_object_name' => 'nullable|string',
-            'iptc_subject_reference' => 'nullable|string',
-            'iptc_special_instructions' => 'nullable|string',
-            'iptc_date_created' => 'nullable', // TODO Date
-            'iptc_time_created' => 'nullable', // TODO Time
-            'iptc_byline' => 'nullable|string',
-            'iptc_byline_title' => 'nullable|string',
-            'iptc_city' => 'nullable|string',
-            'iptc_sub_location' => 'nullable|string',
-            'iptc_province_state' => 'nullable|string',
-            'iptc_country_primary_location_code' => 'nullable|string',
-            'iptc_country_primary_location_name' => 'nullable|string',
-            'iptc_original_transmission_reference' => 'nullable|string',
-            'iptc_headline' => 'nullable|string',
-            'iptc_credit' => 'nullable|string',
-            'iptc_source' => 'nullable|string',
-            'iptc_copyright_notice' => 'nullable|string',
-            'iptc_caption_abstract' => 'nullable|string',
-            'iptc_writer_editor' => 'nullable|string',
-            'iptc_application_record_version' => 'nullable|integer'
-        ]);
+        $validated = $request->validated();
 
         $image->update($validated);
-        return redirect()->route('images.show', $image);
+        return redirect()->route('images.edit', $image);
     }
 
-    public function export(Image $image)
+    public function export(Request $request, Image $image)
     {
-        ExifToolService::write(Storage::path($image->original_path), $image->iptc());
+        $validated = $request->validate([
+            'format' => "nullable|in:jpg,jpeg,png,webp",
+        ]);
 
-        return Storage::disk('public')->download(
-            $image->original_path,
-            $image->name . '.' . pathinfo($image->original_path, PATHINFO_EXTENSION)
-        );
+        $format = $validated['format'] ?? pathinfo($image->original_path, PATHINFO_EXTENSION);
+        $format = strtolower($format);
+
+        $originalPath = Storage::path($image->original_path);
+
+        ExifToolService::write($originalPath, $image->iptc());
+
+        if ($format === strtolower(pathinfo($originalPath, PATHINFO_EXTENSION))) {
+            return Storage::disk('public')->download(
+                $image->original_path,
+                $image->name . '.' . $format
+            );
+        }
+
+        $extension = strtolower(pathinfo($originalPath, PATHINFO_EXTENSION));
+        switch ($extension) {
+            case 'jpeg':
+            case 'jpg':
+                $img = imagecreatefromjpeg($originalPath);
+                break;
+            case 'png':
+                $img = imagecreatefrompng($originalPath);
+                break;
+            default:
+                abort(400, 'Unsupported image format.');
+        }
+
+        if (!$img) {
+            abort(500, 'Failed to load image.');
+        }
+
+        $tempPath = sys_get_temp_dir() . '/' . uniqid('export_', true) . '.' . $format;
+
+        switch ($format) {
+            case 'jpeg':
+            case 'jpg':
+                imagejpeg($img, $tempPath);
+                break;
+            case 'png':
+                imagepng($img, $tempPath);
+                break;
+            default:
+                imagedestroy($img);
+                abort(400, 'Unsupported target format.');
+        }
+
+        imagedestroy($img);
+
+        return response()->download($tempPath, $image->name . '.' . $format)->deleteFileAfterSend(true);
     }
 
     /**

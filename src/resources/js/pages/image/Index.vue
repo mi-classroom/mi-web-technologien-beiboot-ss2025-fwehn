@@ -1,25 +1,26 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { Pencil, Plus } from 'lucide-vue-next';
+import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Images', href: '/images' }];
-const props = defineProps(['images']);
+defineProps(['images']);
 
 const isDragging = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
 
 const form = useForm({
-    image: null as File | null,
+    images: [] as File[],
 });
 
 const submitForm = () => {
     form.post(route('images.store'), {
         forceFormData: true,
         preserveScroll: true,
-        onError: () => {
+        onError: (err) => {
+            console.error(err);
             alert('Fehler beim Upload.');
         },
     });
@@ -27,10 +28,15 @@ const submitForm = () => {
 
 const handleDrop = (e: DragEvent) => {
     isDragging.value = false;
-    const file = e.dataTransfer?.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-        form.image = file;
-        submitForm();
+
+    if (e.dataTransfer?.files) {
+        for (const file of e.dataTransfer?.files) {
+            if (file.type.startsWith('image/')) {
+                form.images.push(file);
+            }
+        }
+
+        if (form.images.length > 0) submitForm();
     }
 };
 
@@ -47,34 +53,44 @@ const handleDragLeave = (e: DragEvent) => {
 <template>
     <Head title="Images" />
 
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <MainLayout :breadcrumbs="breadcrumbs">
         <form
             @submit.prevent="submitForm"
-            class="relative h-full w-full"
+            class="relative h-full w-full overflow-y-auto"
             @dragover.prevent
             @dragenter.prevent="handleDragEnter"
             @dragleave="handleDragLeave"
             @drop.prevent="handleDrop"
         >
             <div
-                v-if="isDragging || props.images.length === 0"
-                class="drop-overlay pointer-events-auto absolute inset-0 z-40 flex items-center justify-center rounded-xl border-4 border-dashed bg-background text-2xl font-semibold text-primary"
+                v-if="isDragging || images.length === 0"
+                class="drop-overlay bg-background pointer-events-auto fixed bottom-0 left-64 right-0 top-12 z-40 bg-warm-light p-4"
             >
-                Datei hierher ziehen zum Hochladen
+                <div
+                    class="flex h-full w-full items-center justify-center rounded-xl border-4 border-dashed border-primary text-2xl font-semibold text-primary"
+                >
+                    Datei hierher ziehen zum Hochladen
+                </div>
             </div>
 
             <input
                 type="file"
                 accept="image/*"
+                multiple
                 class="hidden"
                 ref="fileInput"
                 @change="
                     (e) => {
-                        const file = (e.target as HTMLInputElement).files?.[0] as File | undefined;
-                        if (file?.type.startsWith('image/')) {
-                            form.image = file;
-                            submitForm();
-                        }
+                        const files = (e.target as HTMLInputElement)?.files;
+                        if (!files) return;
+
+                        [...files].forEach((file) => {
+                            if (file && file.type.startsWith('image/')) {
+                                form.images.push(file);
+                            }
+                        });
+
+                        if (form.images.length > 0) submitForm();
                     }
                 "
             />
@@ -82,32 +98,41 @@ const handleDragLeave = (e: DragEvent) => {
             <div class="fixed bottom-8 right-8 z-50">
                 <button
                     type="button"
-                    class="rounded-full bg-primary p-4 text-accent shadow-lg transition-all"
+                    class="text-accent rounded-full bg-primary p-4 shadow-lg transition-all"
                     @click="fileInput?.click()"
                     :disabled="form.processing"
                 >
                     <Plus />
                 </button>
 
-                <div v-if="form.errors.image" class="mt-2 bg-destructive text-sm">
-                    {{ form.errors.image }}
+                <div v-if="form.errors.images" class="bg-destructive mt-2 text-sm">
+                    {{ form.errors.images }}
                 </div>
             </div>
 
-            <div v-if="props.images.length > 0" class="mt-4 flex flex-wrap items-center justify-center gap-4">
-                <Link
-                    v-for="image in props.images"
-                    :key="image.id"
-                    :href="route('images.show', image.id)"
-                    class="group relative h-60 w-60 shadow"
-                >
-                    <span class="absolute -right-3 -top-3 hidden items-center justify-center rounded-full bg-secondary p-2 text-secondary-foreground shadow-lg transition-all hover:scale-110 group-hover:flex">
-                        <Pencil />
-                    </span>
+            <div v-if="images.length > 0" class="flex h-full w-full flex-col gap-2 p-4">
+                <div v-for="image in images" :key="image.id" class="flex w-full rounded-md border-s border-warm-medium">
+                    <img
+                        class="h-40 min-h-40 w-40 min-w-40 bg-warm-medium object-contain p-0"
+                        :src="image.preview_url"
+                        :alt="image.name"
+                        loading="lazy"
+                    />
+                    <div class="flex h-full w-full flex-col justify-center pl-4">
+                        <h1 class="text-xl font-semibold">{{ image.name }}</h1>
+                        <p>{{ image.iptc_date_created }}</p>
+                    </div>
+                    <div class="flex h-40 items-center justify-center gap-4 pr-10">
+                        <Link as="a" :href="route('images.edit', image)">
+                            <Pencil />
+                        </Link>
 
-                    <img :src="image.preview_url" :alt="image.name" class="h-full w-full rounded-lg object-cover" />
-                </Link>
+                        <Link method="delete" as="a" :href="route('images.destroy', image)">
+                            <Trash2 />
+                        </Link>
+                    </div>
+                </div>
             </div>
         </form>
-    </AppLayout>
+    </MainLayout>
 </template>

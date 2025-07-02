@@ -48,21 +48,21 @@ const handleDragLeave = (e: DragEvent) => {
         @drop.prevent="handleDrop"
     >
         <div
-            class="pointer-events-auto h-full w-full  inset-0 z-40 flex items-center justify-center rounded border-warm-medium border-s bg-lightest text-2xl font-semibold text-primary"
+            class="pointer-events-auto inset-0 z-40 flex h-full w-full items-center justify-center rounded border-s border-warm-medium bg-lightest text-2xl font-semibold text-primary"
         >
             Datei hierher ziehen zum Hochladen
 
             <div class="">
                 <button
                     type="button"
-                    class="rounded-full bg-primary p-4 text-accent shadow-lg transition-all"
+                    class="text-accent rounded-full bg-primary p-4 shadow-lg transition-all"
                     @click="fileInput?.click()"
                     :disabled="form.processing"
                 >
                     <Plus />
                 </button>
 
-                <div v-if="form.errors.images" class="mt-2 bg-destructive text-sm">
+                <div v-if="form.errors.images" class="bg-destructive mt-2 text-sm">
                     {{ form.errors.images }}
                 </div>
             </div>
