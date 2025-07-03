@@ -48,6 +48,17 @@ const handleDragLeave = (e: DragEvent) => {
         isDragging.value = false;
     }
 };
+
+const selectedImages = ref<number[]>([]);
+
+const toggleSelection = (imageId: number) => {
+    const index = selectedImages.value.indexOf(imageId);
+    if (index === -1) {
+        selectedImages.value.push(imageId);
+    } else {
+        selectedImages.value.splice(index, 1);
+    }
+};
 </script>
 
 <template>
@@ -95,10 +106,28 @@ const handleDragLeave = (e: DragEvent) => {
                 "
             />
 
-            <div class="fixed bottom-8 right-8 z-50">
+            <div class="fixed bottom-8 right-8 z-50 flex flex-col items-center justify-end gap-4">
+                <Link
+                    as="button"
+                    v-if="selectedImages.length > 0"
+                    :href="route('images.edit-selection', { images: selectedImages })"
+                    class="button-primary rounded-full p-4 shadow-lg transition-all"
+                >
+                    <Pencil />
+                </Link>
+
+                <Link
+                    as="button"
+                    v-if="selectedImages.length > 0"
+                    :href="route('images.destroy-selection', { images: selectedImages })"
+                    class="button-primary rounded-full p-4 shadow-lg transition-all"
+                >
+                    <Trash2 />
+                </Link>
+
                 <button
                     type="button"
-                    class="text-accent rounded-full bg-primary p-4 shadow-lg transition-all"
+                    class="button-primary rounded-full p-4 shadow-lg transition-all"
                     @click="fileInput?.click()"
                     :disabled="form.processing"
                 >
@@ -111,7 +140,20 @@ const handleDragLeave = (e: DragEvent) => {
             </div>
 
             <div v-if="images.length > 0" class="flex h-full w-full flex-col gap-2 p-4">
-                <div v-for="image in images" :key="image.id" class="flex w-full rounded-md border-s border-warm-medium">
+                <div
+                    v-for="image in images"
+                    :key="image.id"
+                    class="flex w-full cursor-pointer select-none rounded-md border-m"
+                    :class="selectedImages.includes(image.id) ? 'border-primary' : 'border-warm-medium'"
+                    @click="toggleSelection(image.id)"
+                >
+                    <input
+                        type="checkbox"
+                        class="hidden"
+                        :checked="selectedImages.includes(image.id)"
+                        @change.prevent
+                    />
+
                     <img
                         class="h-40 min-h-40 w-40 min-w-40 bg-warm-medium object-contain p-0"
                         :src="image.preview_url"

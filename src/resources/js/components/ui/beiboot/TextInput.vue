@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils';
 
 const props = defineProps<{
     defaultValue?: string | number;
-    modelValue?: string | number;
+    modelValue?: unknown;
     class?: HTMLAttributes['class'];
     label: string;
-    error: string;
+    error?: string;
     id: string;
 }>();
 

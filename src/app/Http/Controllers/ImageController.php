@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ImageRequest;
+use App\Http\Requests\ImageSelectionRequest;
 use Intervention\Image\Facades\Image as InterventionImage;
 use App\Models\Image;
 use App\Services\ExifToolService;
@@ -104,10 +105,14 @@ class ImageController extends Controller
         ]);
     }
 
-    public function editSelection()
+    public function editSelection(ImageSelectionRequest $request)
     {
+        $validated = $request->validated();
+
+        $images = Image::whereIn('id', $validated['images'])->get();
+
         return Inertia::render('image/EditSelection', [
-            "image" => Image::inRandomOrder()->first(),
+            "images" => $images,
         ]);
     }
 
@@ -120,6 +125,11 @@ class ImageController extends Controller
 
         $image->update($validated);
         return redirect()->route('images.edit', $image);
+    }
+
+    public function updateSelection(ImageSelectionRequest $request)
+    {
+        //
     }
 
     public function export(Request $request, Image $image)
@@ -179,10 +189,16 @@ class ImageController extends Controller
         return response()->download($tempPath, $image->name . '.' . $format)->deleteFileAfterSend(true);
     }
 
+    public function exportSelection(ImageSelectionRequest $request)
+    {
+        //
+    }
+
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Image $image)
+    public
+    function destroy(Image $image)
     {
         Gate::authorize('delete', $image);
 
@@ -191,5 +207,11 @@ class ImageController extends Controller
         Storage::disk('public')->delete($path);
 
         return redirect()->route('images.index');
+    }
+
+    public
+    function destroySelection(ImageSelectionRequest $request)
+    {
+        //
     }
 }

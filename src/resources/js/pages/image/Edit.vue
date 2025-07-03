@@ -35,16 +35,11 @@ const form = useForm({ ...props.image });
                         class="h-[calc(100%-4rem)] max-h-[calc(100%-4rem)] w-full max-w-full flex-grow self-center object-contain"
                     />
 
-                    <div class="flex h-16 flex-row justify-center gap-2">
-                        <button
-                            type="submit"
-                            class="h-10 rounded-md bg-primary px-4 align-middle text-lightest hover:bg-primary-hover hover:text-warm-light"
-                        >
-                            Submit
-                        </button>
+                    <div class="flex h-16 flex-row items-center justify-center gap-2">
+                        <button type="submit" class="button-primary h-10 rounded-md px-4 align-middle">Submit</button>
                         <button
                             @click.prevent="form.delete(route('images.destroy', image.id))"
-                            class="h-10 rounded-md bg-secondary px-4 align-middle text-lightest hover:bg-secondary-hover hover:text-warm-light"
+                            class="button-secondary h-10 rounded-md px-4 align-middle"
                         >
                             Delete
                         </button>

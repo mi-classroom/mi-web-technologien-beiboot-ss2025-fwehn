@@ -17,3 +17,11 @@ html {
         @apply bg-warm-light text-warm-dark;
     }
 }
+
+.button-primary {
+    @apply bg-primary text-lightest hover:bg-primary-hover hover:text-warm-light;
+}
+
+.button-secondary {
+    @apply bg-secondary text-lightest hover:bg-secondary-hover hover:text-warm-light;
+}
