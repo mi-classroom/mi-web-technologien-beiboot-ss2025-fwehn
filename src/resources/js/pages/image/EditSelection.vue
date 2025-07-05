@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import CheckboxDropdown from '@/components/ui/beiboot/CheckboxDropdown.vue';
 import DownloadButton from '@/components/ui/beiboot/DownloadButton.vue';
 import TextInput from '@/components/ui/beiboot/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
+import { trans } from 'laravel-vue-i18n';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
 const props = defineProps(['images']);
-const imageIds = props.images.map((image) => image.id);
+const imageIds = props.images.map((image: Image) => image.id);
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Images', href: route('images.index') },
@@ -18,10 +20,26 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const form = useForm<{ [key: string]: any }>({
+const initialFormValues = {
     name_prefix: '',
-    iptc_object_name: '',
-});
+};
+
+if (props.images.length > 0) {
+    const iptcKeys = Object.keys(props.images[0]).filter((key) => key.startsWith('iptc'));
+
+    for (const key of iptcKeys) {
+        initialFormValues[key] = [
+            ...new Set(props.images.map((image: Image) => image[key]).filter((value?: string) => !!value)),
+        ].join(', ');
+    }
+}
+
+const form = useForm<{ [key: string]: any }>(initialFormValues);
+
+const editable = ref<Record<string, string>>({});
+const options = Object.keys(props.images[0])
+    .filter((key) => key.startsWith('iptc'))
+    .map((key) => ({ [key]: trans('iptc.' + key) }));
 
 const currentImageIndex = ref(0);
 
@@ -41,12 +59,32 @@ const currentImage = computed(() => props.images[currentImageIndex.value]);
     <MainLayout :breadcrumbs="breadcrumbs">
         <form
             @submit.prevent="
-                () => form.put(route('images.update-selection', { images: imageIds }), { preserveState: true })
+                () => {
+                    const payload = Object.fromEntries(
+                        Object.entries(form.data()).filter(
+                            ([key]) => key === 'name_prefix' || Object.prototype.hasOwnProperty.call(editable, key),
+                        ),
+                    );
+
+                    router.put(route('images.update-selection', { images: imageIds }), payload, {
+                        preserveState: true,
+                        onSuccess: () => {},
+                    });
+                }
             "
             class="flex h-full flex-col items-stretch justify-stretch gap-2"
         >
-            <div class="grid gap-2 px-8 pl-4 pt-4">
-                <TextInput id="file-name" v-model="form.name_prefix" label="Name" :error="form.errors.name_prefix" />
+            <div class="flex flex-row gap-2 px-8 pl-4 pt-4">
+                <TextInput
+                    id="name_prefix"
+                    v-model="form.name_prefix"
+                    label="Namenspräfix"
+                    :error="form.errors.name_prefix"
+                    class="flex-grow"
+                />
+                <div class="flex items-center justify-center pt-2">
+                    <CheckboxDropdown :options="options" v-model="editable" class="h-full" />
+                </div>
             </div>
 
             <div class="flex max-h-full min-h-0 flex-grow">
@@ -94,17 +132,16 @@ const currentImage = computed(() => props.images[currentImageIndex.value]);
                 </div>
 
                 <div class="max-w-1/2 flex h-full max-h-full w-1/2 flex-col gap-2 overflow-y-auto p-4">
-                    <div
-                        v-for="iptcKey in Object.keys(form).filter((key) => key.startsWith('iptc'))"
-                        :key="iptcKey"
-                        class="grid gap-3"
-                    >
-                        <TextInput
-                            v-model="form[iptcKey]"
-                            :id="iptcKey"
-                            :label="$t(`iptc.` + iptcKey)"
-                            :error="form.errors[iptcKey]"
-                        />
+                    <div v-for="iptcKey in Object.keys(editable)" :key="iptcKey" class="grid gap-3">
+                        <div class="flex flex-row flex-nowrap items-stretch justify-stretch gap-3">
+                            <TextInput
+                                v-model="form[iptcKey]"
+                                :id="iptcKey"
+                                :label="$t(`iptc.` + iptcKey)"
+                                :error="form.errors[iptcKey]"
+                                class="flex-grow"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

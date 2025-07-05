@@ -32,7 +32,7 @@ class ImageRequest extends FormRequest
         return [
             'name' => 'required|string',
 
-            'iptc_object_attribute_reference' => 'required|string',
+            'iptc_object_attribute_reference' => 'nullable|string',
             'iptc_object_name' => 'nullable|string',
             'iptc_subject_reference' => 'nullable|string',
             'iptc_special_instructions' => 'nullable|string',

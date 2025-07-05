@@ -129,8 +129,27 @@ class ImageController extends Controller
 
     public function updateSelection(ImageSelectionRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $images = Image::whereIn('id', $validated['images'])->get();
+
+        $iptcFields = collect($validated)->except(['images', 'name_prefix'])->filter(function ($value) {
+            return $value !== null;
+        });
+
+        foreach ($images as $image) {
+            $updateData = $iptcFields->toArray();
+
+            if (!empty($validated['name_prefix'])) {
+                $updateData['name'] = $validated['name_prefix'] . $image->name;
+            }
+
+            $image->update($updateData);
+        }
+
+        return redirect()->route('images.index')->with('success', 'Bilder erfolgreich aktualisiert.');
     }
+
 
     public function export(Request $request, Image $image)
     {

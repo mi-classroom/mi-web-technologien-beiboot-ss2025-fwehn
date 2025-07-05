@@ -24,7 +24,7 @@ const modelValue = useVModel(props, 'modelValue', emits, {
 
 
 <template>
-    <div>
+    <div :class="class">
         <div class="relative mt-2">
             <input type="text"
                    :id="id"
