@@ -120,6 +120,7 @@ const toggleSelection = (imageId: number) => {
                     as="button"
                     v-if="selectedImages.length > 0"
                     :href="route('images.destroy-selection', { images: selectedImages })"
+                    method="delete"
                     class="button-primary rounded-full p-4 shadow-lg transition-all"
                 >
                     <Trash2 />

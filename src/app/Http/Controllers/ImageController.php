@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ImageRequest;
 use App\Http\Requests\ImageSelectionRequest;
-use Intervention\Image\Facades\Image as InterventionImage;
 use App\Models\Image;
 use App\Services\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
+use ZipArchive;
+use Illuminate\Support\Str;
 
 class ImageController extends Controller
 {
@@ -210,14 +211,87 @@ class ImageController extends Controller
 
     public function exportSelection(ImageSelectionRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $extra = $request->validate([
+            'format' => 'required|in:jpg,jpeg,png,webp',
+        ]);
+
+        $images = Image::whereIn('id', $validated['images'])->get();
+
+        if ($images->isEmpty()) {
+            return redirect()->back()->withErrors(['images' => 'Keine Bilder ausgewählt.']);
+        }
+
+        $zipFileName = 'export_' . now()->timestamp . '_' . Str::random(8) . '.zip';
+        $zipFilePath = storage_path('app/temp/' . $zipFileName);
+
+        if (!file_exists(dirname($zipFilePath))) {
+            mkdir(dirname($zipFilePath), 0755, true);
+        }
+
+        $zip = new ZipArchive();
+
+        if ($zip->open($zipFilePath, ZipArchive::CREATE) !== true) {
+            abort(500, 'ZIP-Datei konnte nicht erstellt werden.');
+        }
+
+        foreach ($images as $image) {
+            $originalPath = Storage::path($image->original_path);
+            $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
+            $format = $extra['format'];;
+
+            ExifToolService::write($originalPath, $image->iptc());
+
+            $tempImagePath = $originalPath;
+
+            if (strtolower($extension) !== $format) {
+                $tempImagePath = sys_get_temp_dir() . '/' . uniqid('export_', true) . '.' . $format;
+
+                switch (strtolower($extension)) {
+                    case 'jpeg':
+                    case 'jpg':
+                        $img = imagecreatefromjpeg($originalPath);
+                        break;
+                    case 'png':
+                        $img = imagecreatefrompng($originalPath);
+                        break;
+                    default:
+                        continue 2;
+                }
+
+                if (!$img) {
+                    continue;
+                }
+
+                switch ($format) {
+                    case 'jpeg':
+                    case 'jpg':
+                        imagejpeg($img, $tempImagePath);
+                        break;
+                    case 'png':
+                        imagepng($img, $tempImagePath);
+                        break;
+                    default:
+                        imagedestroy($img);
+                        continue 2;
+                }
+
+                imagedestroy($img);
+            }
+
+            $filenameInZip = $image->name . '.' . $format;
+            $zip->addFile($tempImagePath, $filenameInZip);
+        }
+
+        $zip->close();
+
+        return response()->download($zipFilePath, 'images_export.zip')->deleteFileAfterSend(true);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public
-    function destroy(Image $image)
+    public function destroy(Image $image)
     {
         Gate::authorize('delete', $image);
 
@@ -228,9 +302,21 @@ class ImageController extends Controller
         return redirect()->route('images.index');
     }
 
-    public
-    function destroySelection(ImageSelectionRequest $request)
+    public function destroySelection(ImageSelectionRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $images = Image::whereIn('id', $validated['images'])->get();
+
+        foreach ($images as $image) {
+            Gate::authorize('delete', $image);
+
+            $path = $image->original_path;
+            $image->delete();
+
+            Storage::disk('public')->delete($path);
+        }
+
+        return redirect()->route('images.index');
     }
 }
