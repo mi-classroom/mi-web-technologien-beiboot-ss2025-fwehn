@@ -36,6 +36,7 @@ const fullHref = computed(() => {
             <option value="jpg">.jpg</option>
             <option value="png">.png</option>
             <option value="avif">.avif</option>
+            <option value="webp">.webp</option>
         </select>
     </div>
 </template>

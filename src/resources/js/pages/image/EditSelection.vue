@@ -20,7 +20,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const initialFormValues = {
+const initialFormValues: { [key: string]: string } = {
     name_prefix: '',
 };
 

@@ -155,7 +155,7 @@ class ImageController extends Controller
     public function export(Request $request, Image $image)
     {
         $validated = $request->validate([
-            'format' => "nullable|in:jpg,jpeg,png,webp",
+            'format' => "nullable|in:avif,jpg,jpeg,png,webp",
         ]);
 
         $format = $validated['format'] ?? pathinfo($image->original_path, PATHINFO_EXTENSION);
@@ -192,12 +192,18 @@ class ImageController extends Controller
         $tempPath = sys_get_temp_dir() . '/' . uniqid('export_', true) . '.' . $format;
 
         switch ($format) {
+            case 'avif':
+                imageavif($img, $tempPath);
+                break;
             case 'jpeg':
             case 'jpg':
                 imagejpeg($img, $tempPath);
                 break;
             case 'png':
                 imagepng($img, $tempPath);
+                break;
+            case 'webp':
+                imagewebp($img, $tempPath);
                 break;
             default:
                 imagedestroy($img);
@@ -213,7 +219,7 @@ class ImageController extends Controller
     {
         $validated = $request->validated();
         $extra = $request->validate([
-            'format' => 'required|in:jpg,jpeg,png,webp',
+            'format' => 'required|in:avif,jpg,jpeg,png,webp',
         ]);
 
         $images = Image::whereIn('id', $validated['images'])->get();
@@ -264,12 +270,18 @@ class ImageController extends Controller
                 }
 
                 switch ($format) {
+                    case 'avif':
+                        imageavif($img, $tempImagePath);
+                        break;
                     case 'jpeg':
                     case 'jpg':
                         imagejpeg($img, $tempImagePath);
                         break;
                     case 'png':
                         imagepng($img, $tempImagePath);
+                        break;
+                    case 'webp':
+                        imagewebp($img, $tempImagePath);
                         break;
                     default:
                         imagedestroy($img);
