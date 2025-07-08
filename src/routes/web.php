@@ -15,7 +15,7 @@ Route::get('dashboard', function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('folders/{folder}/select', [FolderController::class, 'select'])->name('folders.select');
-    Route::get('folders/{folder}/export', [ImageController::class, 'export'])->name('folders.export');
+    Route::get('folders/{folder}/export', [FolderController::class, 'export'])->name('folders.export');
 
     Route::apiResource('folders', FolderController::class)
         ->only(['index', 'store', 'show', 'edit', 'update', 'destroy'])

@@ -21,7 +21,6 @@ const fullHref = computed(() => {
     <div class="inline-flex rounded-md shadow-sm overflow-hidden h-10 group">
         <a
             :href="fullHref"
-            download
             class="px-4 text-sm font-medium text-warm-dark bg-lightest hover:bg-light hover:text-primary
              focus:ring-2 focus:ring-primary h-full flex items-center"
         >

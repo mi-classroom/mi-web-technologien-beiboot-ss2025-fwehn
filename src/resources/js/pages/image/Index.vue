@@ -23,6 +23,7 @@ const submitForm = () => {
         onError: (err) => {
             console.error(err);
             alert('Fehler beim Upload.');
+            form.reset();
         },
         onSuccess: () => {
             form.reset();
@@ -35,6 +36,8 @@ const handleDrop = (e: DragEvent) => {
 
     if (e.dataTransfer?.files) {
         for (const file of e.dataTransfer?.files) {
+            console.log(typeof file);
+
             if (file.type.startsWith('image/')) {
                 form.images.push(file);
             }
