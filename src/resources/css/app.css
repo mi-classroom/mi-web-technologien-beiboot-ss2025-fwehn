@@ -25,3 +25,12 @@ html {
 .button-secondary {
     @apply bg-secondary text-lightest hover:bg-secondary-hover hover:text-warm-light;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

@@ -15,12 +15,21 @@ use Illuminate\Support\Str;
 
 class ImageController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $images = Image::latest()->where('user_id', auth()->id())->get();
+        $query = Image::query()
+            ->where('user_id', auth()->id())
+            ->latest();
+
+        $folderId = $request->session()->get('current_folder_id');
+
+        if ($folderId && is_numeric($folderId)) {
+            $query->where('folder_id', $folderId);
+        } else {
+            $query->whereNull('folder_id');
+        }
+
+        $images = $query->get();
 
         return Inertia::render('image/Index', [
             'images' => $images,
@@ -45,6 +54,9 @@ class ImageController extends Controller
             'images.*' => 'image',
         ]);
 
+        $folderId = $request->session()->get('current_folder_id');
+
+
         foreach ($request->file('images') as $file) {
             $path = $file->storeAs('originals', time() . '_' . $file->getClientOriginalName());
 
@@ -61,6 +73,7 @@ class ImageController extends Controller
                     'height' => $height,
                     'original_path' => $path,
                     'user_id' => auth()->id(),
+                    'folder_id' => $folderId,
                 ],
                 $iptc
             ));

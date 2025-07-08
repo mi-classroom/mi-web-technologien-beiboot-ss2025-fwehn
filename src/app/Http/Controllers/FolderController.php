@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\FolderRequest;
 use App\Models\Folder;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class FolderController extends Controller
 {
@@ -26,9 +28,11 @@ class FolderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(FolderRequest $request)
     {
-        //
+        $validated = $request->validated();
+        $folder = Folder::create($validated);
+        return redirect()->route('images.edit', $folder);
     }
 
     /**
@@ -44,15 +48,23 @@ class FolderController extends Controller
      */
     public function edit(Folder $folder)
     {
-        //
+        return Inertia::render('folder/Edit', [
+            'folder' => $folder,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Folder $folder)
+    public function update(FolderRequest $request, Folder $folder)
     {
-        //
+        $validated = $request->validated();
+        $folder->update($validated);
+        return redirect()->route('folders.edit', $folder);
+    }
+
+    public function export(Request $request, Folder $folder)
+    {
     }
 
     /**
@@ -61,5 +73,11 @@ class FolderController extends Controller
     public function destroy(Folder $folder)
     {
         //
+    }
+
+    public function select(Folder $folder)
+    {
+        session(['current_folder_id' => $folder->id]);
+        return redirect()->route('images.index');
     }
 }

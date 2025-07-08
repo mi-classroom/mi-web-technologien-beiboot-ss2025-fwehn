@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MainLayout from '@/layouts/MainLayout.vue';
+import { cn } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
@@ -22,6 +23,9 @@ const submitForm = () => {
         onError: (err) => {
             console.error(err);
             alert('Fehler beim Upload.');
+        },
+        onSuccess: () => {
+            form.reset();
         },
     });
 };
@@ -164,6 +168,22 @@ const toggleSelection = (imageId: number) => {
                     <div class="flex h-full w-full flex-col justify-center pl-4">
                         <h1 class="text-xl font-semibold">{{ image.name }}</h1>
                         <p>{{ image.iptc_date_created }}</p>
+                    </div>
+                    <div class="flex items-center justify-center px-8">
+                        <span
+                            :class="
+                                cn(
+                                    'rounded-full border-2 px-2 py-1 text-center text-lightest',
+                                    image.iptc_fill_percent <= 33
+                                        ? 'bg-secondary'
+                                        : image.iptc_fill_percent < 100
+                                          ? 'bg-primary'
+                                          : 'bg-green-600',
+                                )
+                            "
+                        >
+                            {{ image.iptc_fill_percent }}%
+                        </span>
                     </div>
                     <div class="flex h-40 items-center justify-center gap-4 pr-10">
                         <Link as="a" :href="route('images.edit', image)">

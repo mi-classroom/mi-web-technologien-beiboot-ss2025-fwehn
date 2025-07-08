@@ -2,7 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use Illuminate\Foundation\Inspiring;
+use App\Models\Folder;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
@@ -37,20 +37,99 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $user = $request->user();
+        $folderId = $request->session()->get('current_folder_id');
+        $currentFolder = null;
+
+
+        $folders = collect();
+
+        if ($user && $folderId && is_numeric($folderId)) {
+            $currentFolder = Folder::where('id', $folderId)->where('user_id', $user->id)->first();
+
+            if ($currentFolder) {
+                $folders = collect();
+
+                $folders->push($currentFolder);
+
+                $siblings = Folder::where('parent_folder_id', $currentFolder->parent_folder_id)
+                    ->where('user_id', $user->id)
+                    ->where('id', '!=', $currentFolder->id)
+                    ->get();
+                $folders = $folders->merge($siblings);
+
+                $parent = $currentFolder->parentFolder;
+
+                while ($parent) {
+                    $folders->push($parent);
+
+                    $parentSiblings = Folder::where('parent_folder_id', $parent->parent_folder_id)
+                        ->where('user_id', $user->id)
+                        ->where('id', '!=', $parent->id)
+                        ->get();
+
+                    $folders = $folders->merge($parentSiblings);
+
+                    $parent = $parent->parentFolder;
+                }
+
+                $children = $currentFolder->childFolders()->where('user_id', $user->id)->get();
+                $folders = $folders->merge($children);
+
+                $folders = $folders->unique('id');
+            }
+        } elseif ($user) {
+            $folders = Folder::whereNull('parent_folder_id')->where('user_id', $user->id)->get();
+        }
+
+        $formatted = $folders->map(fn($f) => [
+            'id' => $f->id,
+            'name' => $f->name,
+            'parent_folder_id' => $f->parent_folder_id,
+        ])->values();
+
+        $formatted = $formatted->sortBy('name')->values();
+
+        $tree = $this->buildFolderTree($formatted);
 
         return [
             ...parent::share($request),
-            'name' => config('app.name'),
-            'quote' => ['message' => trim($message), 'author' => trim($author)],
+
             'auth' => [
-                'user' => $request->user(),
+                'user' => $user,
             ],
-            'ziggy' => [
-                ...(new Ziggy)->toArray(),
-                'location' => $request->url(),
-            ],
-            'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+
+            'folders' => $formatted,
+            'foldersTree' => $tree,
+
+            'currentFolder' => $currentFolder ? [
+                'id' => $currentFolder->id,
+                'name' => $currentFolder->name,
+                'parent_folder_id' => $currentFolder->parent_folder_id,
+            ] : null,
         ];
+    }
+
+    private function buildFolderTree($folders)
+    {
+        $byParent = [];
+
+        foreach ($folders as $folder) {
+            $byParent[$folder['parent_folder_id']][] = $folder;
+        }
+
+        $build = function ($parentId) use (&$build, &$byParent) {
+            return collect($byParent[$parentId] ?? [])
+                ->sortBy('name')
+                ->map(function ($folder) use (&$build) {
+                    return [
+                        ...$folder,
+                        'children' => $build($folder['id']),
+                    ];
+                })->values();
+
+        };
+
+        return $build(null);
     }
 }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\FolderController;
 use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -11,6 +12,15 @@ Route::get('/', function () {
 Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('folders/{folder}/select', [FolderController::class, 'select'])->name('folders.select');
+    Route::get('folders/{folder}/export', [ImageController::class, 'export'])->name('folders.export');
+
+    Route::apiResource('folders', FolderController::class)
+        ->only(['index', 'store', 'show', 'edit', 'update', 'destroy'])
+        ->names('folders');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('images/edit-selection', [ImageController::class, 'editSelection'])->name('images.edit-selection');

@@ -2,6 +2,7 @@
 import type { BreadcrumbItemType } from '@/types';
 import { Link } from '@inertiajs/vue3';
 
+import FolderTree from '@/components/FolderTree.vue';
 import { ChevronRight } from 'lucide-vue-next';
 
 interface Props {
@@ -16,8 +17,11 @@ withDefaults(defineProps<Props>(), {
 <template>
     <div class="absolute bottom-0 left-0 right-0 top-0 flex justify-stretch">
         <div class="h-full w-64 border-r-s border-warm-medium">
-            <div class="py-4 text-center text-4xl font-bold text-primary">
-                <Link :href="route('images.index')"> IPTC Editor </Link>
+            <div class="flex h-20 items-center justify-center text-center align-middle text-4xl font-bold text-primary">
+                <Link :href="route('images.index')"> IPTC Editor</Link>
+            </div>
+            <div class="h-[calc(100%-5rem)] w-full px-2">
+                <FolderTree />
             </div>
         </div>
         <div

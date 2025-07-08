@@ -13,6 +13,7 @@ class Image extends Model
         'height',
         'user_id',
         'original_path',
+        'folder_id',
 
         'iptc_object_attribute_reference',
         'iptc_object_name',
@@ -37,7 +38,7 @@ class Image extends Model
         'iptc_application_record_version'
     ];
 
-    protected $appends = ['preview_url'];
+    protected $appends = ['preview_url', 'iptc_fill_percent'];
 
     public function getPreviewUrlAttribute(): string
     {
@@ -54,5 +55,23 @@ class Image extends Model
         return collect($this->attributes)
             ->filter(fn($_, $key) => str_starts_with($key, 'iptc_'))
             ->toArray();
+    }
+
+    public function getIptcFillPercentAttribute(): int
+    {
+        $iptcFields = collect($this->attributes)
+            ->filter(fn($_, $key) => str_starts_with($key, 'iptc_'));
+
+        $total = $iptcFields->count();
+
+        if ($total === 0) {
+            return 0;
+        }
+
+        $filled = $iptcFields->filter(function ($value) {
+            return !is_null($value) && $value !== '';
+        })->count();
+
+        return (int)round(($filled / $total) * 100);
     }
 }
