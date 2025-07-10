@@ -181,7 +181,7 @@ const toggleSelection = (imageId: number) => {
                                         ? 'bg-secondary'
                                         : image.iptc_fill_percent < 100
                                           ? 'bg-primary'
-                                          : 'bg-green-600',
+                                          : 'bg-tertiary',
                                 )
                             "
                         >

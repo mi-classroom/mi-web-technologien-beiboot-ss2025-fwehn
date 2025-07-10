@@ -16,56 +16,60 @@ export default {
                 sans: ['Spline Sans', ...defaultTheme.fontFamily.sans],
             },
             colors: {
-            primary: {
-                DEFAULT: '#2ABDBD',
-                hover: '#24a7a7', // etwas dunkler für Hover
-            },
-            secondary: {
-                DEFAULT: '#FF4F5B',
-                hover: '#e64550', // ebenfalls dunkler
-            },
+                primary: {
+                    DEFAULT: '#2ABDBD',
+                    hover: '#24a7a7',
+                },
+                secondary: {
+                    DEFAULT: '#FF4F5B',
+                    hover: '#e64550',
+                },
+                tertiary: {
+                    DEFAULT: '#3CCB7F',
+                    hover: '#33b070',
+                },
                 warm: {
                     light: '#EBE9E0',
                     medium: '#A4A195',
                     dark: '#4C4B45',
                 },
                 dark: {
-                    DEFAULT: '#666666'
+                    DEFAULT: '#666666',
                 },
                 darker: {
-                    DEFAULT: '#333333'
+                    DEFAULT: '#333333',
                 },
                 darkest: {
-                    DEFAULT: '#000000'
+                    DEFAULT: '#000000',
                 },
                 darken: {
-                    DEFAULT: '#000000CC'
+                    DEFAULT: '#000000CC',
                 },
                 light: {
-                    DEFAULT: '#F4F4F4'
+                    DEFAULT: '#F4F4F4',
                 },
                 lightest: {
-                    DEFAULT: '#FFFFFF'
+                    DEFAULT: '#FFFFFF',
                 },
                 lighten: {
-                    DEFAULT: '#FFFFFFCC'
-                }
+                    DEFAULT: '#FFFFFFCC',
+                },
             },
             spacing: {
                 '3xs': '5px',
-                'xxs': '10px',
-                'xs': '12xp',
-                's': '16px',
-                'm': '20px',
-                'l': '25px',
-                'xl': '32px',
-                'xxl': '40px',
+                xxs: '10px',
+                xs: '12xp',
+                s: '16px',
+                m: '20px',
+                l: '25px',
+                xl: '32px',
+                xxl: '40px',
             },
             borderWidth: {
-                'xs': '0.5px',
-                's': '1px',
-                'm': '2px'
-            }
+                xs: '0.5px',
+                s: '1px',
+                m: '2px',
+            },
         },
     },
     plugins: [require('tailwindcss-animate')],
