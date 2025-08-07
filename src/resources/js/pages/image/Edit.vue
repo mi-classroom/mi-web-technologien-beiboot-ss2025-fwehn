@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import DownloadButton from '@/components/ui/beiboot/DownloadButton.vue';
-import TextInput from '@/components/ui/beiboot/TextInput.vue';
+import DownloadButton from '@/components/ui/DownloadButton.vue';
+import TextInput from '@/components/ui/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';

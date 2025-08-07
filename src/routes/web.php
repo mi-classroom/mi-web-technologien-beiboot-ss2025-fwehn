@@ -3,15 +3,11 @@
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome');
-})->name('home');
-
-Route::get('dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    session()->reflash();
+    return Auth::check() ? redirect()->route('images.index') : redirect()->route('login');
+})->name('default');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('folders/{folder}/select', [FolderController::class, 'select'])->name('folders.select');

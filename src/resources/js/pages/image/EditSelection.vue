@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import CheckboxDropdown from '@/components/ui/beiboot/CheckboxDropdown.vue';
-import DownloadButton from '@/components/ui/beiboot/DownloadButton.vue';
-import TextInput from '@/components/ui/beiboot/TextInput.vue';
+import CheckboxDropdown from '@/components/ui/CheckboxDropdown.vue';
+import DownloadButton from '@/components/ui/DownloadButton.vue';
+import TextInput from '@/components/ui/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';

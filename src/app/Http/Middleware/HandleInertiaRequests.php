@@ -107,6 +107,13 @@ class HandleInertiaRequests extends Middleware
                 'name' => $currentFolder->name,
                 'parent_folder_id' => $currentFolder->parent_folder_id,
             ] : null,
+
+            'statuses' => [
+                ...(session('status.info') ? ['info' => session('status.info')] : []),
+                ...(session('status.success') ? ['success' => session('status.success')] : []),
+                ...(session('status.error') ? ['error' => session('status.error')] : []),
+                ...(session('status.warning') ? ['warning' => session('status.warning')] : []),
+            ],
         ];
     }
 

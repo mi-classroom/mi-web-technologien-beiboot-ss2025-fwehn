@@ -129,6 +129,7 @@ const toggleSelection = (imageId: number) => {
                     :href="route('images.destroy-selection', { images: selectedImages })"
                     method="delete"
                     class="button-primary rounded-full p-4 shadow-lg transition-all"
+                    @success="selectedImages = []"
                 >
                     <Trash2 />
                 </Link>

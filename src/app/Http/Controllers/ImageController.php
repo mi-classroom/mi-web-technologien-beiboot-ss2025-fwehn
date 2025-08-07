@@ -138,7 +138,7 @@ class ImageController extends Controller
         $validated = $request->validated();
 
         $image->update($validated);
-        return redirect()->route('images.edit', $image);
+        return redirect()->route('images.edit', $image)->with('status.success', __('image.update.success'));
     }
 
     public function updateSelection(ImageSelectionRequest $request)
@@ -161,7 +161,7 @@ class ImageController extends Controller
             $image->update($updateData);
         }
 
-        return redirect()->route('images.index')->with('success', 'Bilder erfolgreich aktualisiert.');
+        return redirect()->route('images.index')->with('status.success', 'Bilder erfolgreich aktualisiert.');
     }
 
 
