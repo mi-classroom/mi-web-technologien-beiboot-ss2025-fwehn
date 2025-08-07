@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\FolderRequest;
 use App\Models\Folder;
-use App\Models\Image;
-use App\Services\ExifToolService;
+use App\Facades\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
