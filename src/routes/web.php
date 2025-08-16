@@ -12,6 +12,7 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('folders/{folder}/select', [FolderController::class, 'select'])->name('folders.select');
     Route::get('folders/{folder}/export', [FolderController::class, 'export'])->name('folders.export');
+    Route::get('folders/{folder}/select-and-edit', [FolderController::class, 'select'])->name('folders.select-and-edit');
 
     Route::apiResource('folders', FolderController::class)
         ->only(['index', 'store', 'show', 'edit', 'update', 'destroy'])

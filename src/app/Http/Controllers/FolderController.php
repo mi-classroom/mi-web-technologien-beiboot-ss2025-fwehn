@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\FolderOperation;
 use App\Http\Requests\FolderRequest;
 use App\Models\Folder;
 use App\Facades\ExifToolService;
@@ -10,7 +11,6 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use ZipArchive;
-use function PHPUnit\Framework\fileExists;
 
 class FolderController extends Controller
 {
@@ -37,7 +37,7 @@ class FolderController extends Controller
     {
         $validated = $request->validated();
         $folder = Folder::create($validated);
-        return redirect()->route('images.edit', $folder);
+        return redirect()->route('folders.edit', $folder)->with('status.success', __('folder.store.success'));
     }
 
     /**
@@ -55,6 +55,7 @@ class FolderController extends Controller
     {
         return Inertia::render('folder/Edit', [
             'folder' => $folder,
+            'current_folder_id' => $folder->id
         ]);
     }
 
@@ -65,7 +66,41 @@ class FolderController extends Controller
     {
         $validated = $request->validated();
         $folder->update($validated);
-        return redirect()->route('folders.edit', $folder);
+
+        $operation = FolderOperation::tryFrom($validated["operation"]);
+        switch ($operation) {
+            case FolderOperation::PROPAGATE:
+                $folder->images()->update(array_filter(
+                    $validated,
+                    fn($key) => Str::startsWith($key, 'iptc_'),
+                    ARRAY_FILTER_USE_KEY
+                ));
+                break;
+            case FolderOperation::MERGE:
+                foreach ($folder->images as $image) {
+                    $updateData = array_filter(
+                        $validated,
+                        fn($key) => Str::startsWith($key, 'iptc_') && $image->$key === null,
+                        ARRAY_FILTER_USE_KEY
+                    );
+
+                    if (!empty($updateData)) {
+                        $image->update($updateData);
+                    }
+                }
+                break;
+            case FolderOperation::SAVE:
+            default:
+        }
+
+        return redirect()->route('folders.edit', $folder)
+            ->with(
+                'status.success',
+                trans_choice(
+                    'folder.update.success',
+                    ($operation === FolderOperation::SAVE || $operation === null) ? 1 : 2
+                )
+            );
     }
 
     public function export(Request $request, Folder $folder)
@@ -155,16 +190,19 @@ class FolderController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public
-    function destroy(Folder $folder)
+    public function destroy(Folder $folder)
     {
         //
     }
 
-    public
-    function select(Folder $folder)
+    public function select(Request $request, Folder $folder)
     {
         session(['current_folder_id' => $folder->id]);
+
+        if ($request->route()->getName() === 'folders.select-and-edit') {
+            return redirect()->route('folders.edit', $folder);
+        }
+
         return redirect()->route('images.index');
     }
 }

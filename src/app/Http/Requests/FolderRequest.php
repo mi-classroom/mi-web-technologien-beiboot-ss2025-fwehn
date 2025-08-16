@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\FolderOperation;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class FolderRequest extends FormRequest
 {
@@ -23,6 +25,8 @@ class FolderRequest extends FormRequest
     {
         return [
             "name" => "required|string",
+
+            "operation" => ["required", Rule::enum(FolderOperation::class)],
 
             'iptc_object_attribute_reference' => 'nullable|string',
             'iptc_object_name' => 'nullable|string',

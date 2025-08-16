@@ -33,7 +33,15 @@ defineProps<{
                 {{ folder.name }}
             </span>
 
-            <Link :href="route('folders.edit', folder.id)" class="hidden hover:text-warm-dark group-hover:block">
+            <Link
+                :href="route('folders.select-and-edit', folder.id)"
+                :class="
+                    cn(
+                        'hidden text-warm-medium group-hover:block',
+                        selectedId === folder.id ? 'hover:text-primary' : 'hover:text-warm-dark',
+                    )
+                "
+            >
                 <EllipsisVertical class="flex-shrink-0" />
             </Link>
         </Link>

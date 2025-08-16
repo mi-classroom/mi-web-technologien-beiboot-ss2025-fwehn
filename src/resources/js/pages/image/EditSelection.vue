@@ -4,7 +4,7 @@ import DownloadButton from '@/components/ui/DownloadButton.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -36,7 +36,7 @@ if (props.images.length > 0) {
     }
 }
 
-const form = useForm<{ [key: string]: any }>(initialFormValues);
+const form = useForm<{ [key: string]: string }>(initialFormValues);
 
 const editable = ref<Record<string, string>>({});
 const options = Object.keys(props.images[0])
@@ -62,13 +62,17 @@ const currentImage = computed(() => props.images[currentImageIndex.value]);
         <form
             @submit.prevent="
                 () => {
-                    const payload = Object.fromEntries(
-                        Object.entries(form.data()).filter(
-                            ([key]) => key === 'name_prefix' || Object.prototype.hasOwnProperty.call(editable, key),
-                        ),
-                    );
+                    form.transform((data) => {
+                        const filtered: Record<string, any> = {};
+                        for (const key in data) {
+                            if (key === 'name_prefix' || Object.prototype.hasOwnProperty.call(editable, key)) {
+                                filtered[key] = data[key];
+                            }
+                        }
+                        return filtered;
+                    });
 
-                    router.put(route('images.update-selection', { images: imageIds }), payload, {
+                    form.put(route('images.update-selection', { images: imageIds }), {
                         preserveState: true,
                         onSuccess: () => {},
                     });
