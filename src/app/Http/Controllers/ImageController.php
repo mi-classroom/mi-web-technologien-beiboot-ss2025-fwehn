@@ -56,7 +56,6 @@ class ImageController extends Controller
 
         $folderId = $request->session()->get('current_folder_id');
 
-
         foreach ($request->file('images') as $file) {
             $path = $file->storeAs('originals', time() . '_' . $file->getClientOriginalName());
 
@@ -79,7 +78,7 @@ class ImageController extends Controller
             ));
         }
 
-        return redirect()->route('images.index');
+        return redirect()->route('images.index')->with('status.success', __('image.store.success'));
     }
 
     public function preview(Image $image)
@@ -324,7 +323,7 @@ class ImageController extends Controller
         $image->delete();
         Storage::disk('public')->delete($path);
 
-        return redirect()->route('images.index');
+        return redirect()->route('images.index')->with('status.success', __('image.destroy.success'));
     }
 
     public function destroySelection(ImageSelectionRequest $request)
@@ -342,6 +341,6 @@ class ImageController extends Controller
             Storage::disk('public')->delete($path);
         }
 
-        return redirect()->route('images.index');
+        return redirect()->route('images.index')->with('status.success', __('image.destroySelection.success'));
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Facades;
 
 use App\Services\ExifToolService as Service;
-use Pest\Mutate\Event\Facade;
+use Illuminate\Support\Facades\Facade;
 
 class ExifToolService extends Facade
 {

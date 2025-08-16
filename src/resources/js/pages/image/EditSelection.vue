@@ -25,7 +25,9 @@ const initialFormValues: { [key: string]: string } = {
 };
 
 if (props.images.length > 0) {
-    const iptcKeys = Object.keys(props.images[0]).filter((key) => key.startsWith('iptc'));
+    const iptcKeys = Object.keys(props.images[0]).filter(
+        (key) => key.startsWith('iptc') && key !== 'iptc_fill_percent',
+    );
 
     for (const key of iptcKeys) {
         initialFormValues[key] = [
@@ -38,7 +40,7 @@ const form = useForm<{ [key: string]: any }>(initialFormValues);
 
 const editable = ref<Record<string, string>>({});
 const options = Object.keys(props.images[0])
-    .filter((key) => key.startsWith('iptc'))
+    .filter((key) => key.startsWith('iptc') && key !== 'iptc_fill_percent')
     .map((key) => ({ [key]: trans('iptc.' + key) }));
 
 const currentImageIndex = ref(0);

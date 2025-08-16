@@ -49,7 +49,9 @@ const form = useForm({ ...props.image });
 
                 <div class="max-w-1/2 flex h-full max-h-full w-1/2 flex-col gap-2 overflow-y-auto p-4">
                     <div
-                        v-for="iptcKey in Object.keys(form).filter((key) => key.startsWith('iptc'))"
+                        v-for="iptcKey in Object.keys(form).filter(
+                            (key) => key.startsWith('iptc') && key !== 'iptc_fill_percent',
+                        )"
                         :key="iptcKey"
                         class="grid gap-3"
                     >

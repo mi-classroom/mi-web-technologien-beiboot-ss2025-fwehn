@@ -33,7 +33,7 @@ createInertiaApp({
             .use(plugin)
             .use(i18nVue, {
                 lang: 'de',
-                resolve: async (lang) => {
+                resolve: async (lang: string) => {
                     const langs = import.meta.glob('../../lang/*.json');
                     return await langs[`../../lang/${lang}.json`]();
                 },
