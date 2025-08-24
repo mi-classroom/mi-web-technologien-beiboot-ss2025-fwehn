@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\FolderOperation;
 use App\Http\Requests\ImageRequest;
 use App\Http\Requests\ImageSelectionRequest;
+use App\Models\Folder;
 use App\Models\Image;
 use App\Facades\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use ZipArchive;
 use Illuminate\Support\Str;
@@ -49,36 +52,61 @@ class ImageController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'images' => 'required|array',
-            'images.*' => 'image',
+        $validated = $request->validate([
+            'image' => 'required|image',
+            'operation' => ['required', Rule::enum(FolderOperation::class)]
         ]);
 
         $folderId = $request->session()->get('current_folder_id');
 
-        foreach ($request->file('images') as $file) {
-            $path = $file->storeAs('originals', time() . '_' . $file->getClientOriginalName());
+        $file = $request->file('image');
+        $path = $file->storeAs('originals', time() . '_' . $file->getClientOriginalName());
 
-            $imageSize = getimagesize($file->getPathname());
-            $width = $imageSize[0];
-            $height = $imageSize[1];
+        $imageSize = getimagesize($file->getPathname());
+        $width = $imageSize[0];
+        $height = $imageSize[1];
 
-            $iptc = ExifToolService::read(Storage::path($path));
+        $iptc = ExifToolService::read(Storage::path($path));
 
-            Image::create(array_merge(
-                [
-                    'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-                    'width' => $width,
-                    'height' => $height,
-                    'original_path' => $path,
-                    'user_id' => auth()->id(),
-                    'folder_id' => $folderId,
-                ],
-                $iptc
-            ));
+        $image = Image::create(array_merge(
+            [
+                'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+                'width' => $width,
+                'height' => $height,
+                'original_path' => $path,
+                'user_id' => auth()->id(),
+                'folder_id' => $folderId,
+            ],
+            $iptc
+        ));
+
+        $folder = Folder::find($folderId);
+        $operation = FolderOperation::tryFrom($validated["operation"]);
+
+        if ($folder && !in_array($operation, [FolderOperation::SAVE, null])) {
+            $folderIPTC = collect($folder->getAttributes())
+                ->filter(fn($value, $key) => str_starts_with($key, 'iptc_'))
+                ->all();
+
+            match ($operation) {
+                FolderOperation::PROPAGATE => $image->update($folderIPTC),
+                FolderOperation::MERGE => $image->update(array_filter(
+                    $folderIPTC,
+                    fn($key) => $image->$key === null, ARRAY_FILTER_USE_KEY
+                )),
+                default => null
+            };
         }
 
-        return redirect()->route('images.index')->with('status.success', __('image.store.success'));
+        if ($request->expectsJson()) {
+            return response()->json([
+                'status' => 'success',
+                'image' => $image
+            ]);
+        }
+
+        return redirect()->route('images.index')
+            ->with('status.success', __('image.store.success', ["imageName" => $image->name]));
     }
 
     public function preview(Image $image)

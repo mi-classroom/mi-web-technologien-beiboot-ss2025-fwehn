@@ -42,12 +42,10 @@ function confirmSubmit(operation: FolderOperation) {
         const filtered: Record<string, any> = {};
 
         for (const key in data) {
-            if (Object.prototype.hasOwnProperty.call(editable.value, key)) {
+            if (key in editable.value) {
                 filtered[key] = data[key];
             }
         }
-
-        console.log({ name: data.name, operation: operation.toString(), ...filtered });
 
         return { name: data.name, operation: operation.toString(), ...filtered };
     });

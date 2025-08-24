@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import BaseModal from '@/components/ui/BaseModal.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
+import { FolderOperation } from '@/types/enums';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -11,39 +13,44 @@ defineProps(['images']);
 
 const isDragging = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
+const pendingFiles = ref<File[]>([]);
+const showModal = ref(false);
 
-const form = useForm({
-    images: [] as File[],
+const form = useForm<{
+    image: File | null;
+    operation: 'save' | 'propagate' | 'merge';
+}>({
+    image: null,
+    operation: 'save',
 });
 
-const submitForm = () => {
-    form.post(route('images.store'), {
-        forceFormData: true,
-        preserveScroll: true,
-        onError: (err) => {
-            console.error(err);
-            alert('Fehler beim Upload.');
-            form.reset();
-        },
-        onSuccess: () => {
-            form.reset();
-        },
-    });
+const open = () => {
+    showModal.value = true;
+};
+
+const close = () => {
+    showModal.value = false;
 };
 
 const handleDrop = (e: DragEvent) => {
     isDragging.value = false;
-
     if (e.dataTransfer?.files) {
-        for (const file of e.dataTransfer?.files) {
-            console.log(typeof file);
-
-            if (file.type.startsWith('image/')) {
-                form.images.push(file);
-            }
+        const validImages = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith('image/'));
+        if (validImages.length > 0) {
+            pendingFiles.value = validImages;
+            open();
         }
+    }
+};
 
-        if (form.images.length > 0) submitForm();
+const handleFileInputChange = (e: Event) => {
+    const files = (e.target as HTMLInputElement)?.files;
+    if (!files) return;
+
+    const validImages = Array.from(files).filter((file) => file.type.startsWith('image/'));
+    if (validImages.length > 0) {
+        pendingFiles.value = validImages;
+        open();
     }
 };
 
@@ -54,6 +61,29 @@ const handleDragLeave = (e: DragEvent) => {
     if ((e.target as HTMLElement).classList.contains('drop-overlay')) {
         isDragging.value = false;
     }
+};
+
+const confirmUpload = async (operation: FolderOperation) => {
+    close();
+
+    for (const file of pendingFiles.value) {
+        form.image = file;
+        form.operation = operation;
+
+        await new Promise<void>((resolve) => {
+            form.post(route('images.store'), {
+                forceFormData: true,
+                preserveScroll: true,
+                headers: { Accept: 'application/json' },
+                onError: () => resolve(),
+                onSuccess: () => resolve(),
+            });
+        });
+
+        form.reset();
+    }
+
+    pendingFiles.value = [];
 };
 
 const selectedImages = ref<number[]>([]);
@@ -73,7 +103,6 @@ const toggleSelection = (imageId: number) => {
 
     <MainLayout :breadcrumbs="breadcrumbs">
         <form
-            @submit.prevent="submitForm"
             class="relative h-full w-full overflow-y-auto"
             @dragover.prevent
             @dragenter.prevent="handleDragEnter"
@@ -97,20 +126,7 @@ const toggleSelection = (imageId: number) => {
                 multiple
                 class="hidden"
                 ref="fileInput"
-                @change="
-                    (e) => {
-                        const files = (e.target as HTMLInputElement)?.files;
-                        if (!files) return;
-
-                        [...files].forEach((file) => {
-                            if (file && file.type.startsWith('image/')) {
-                                form.images.push(file);
-                            }
-                        });
-
-                        if (form.images.length > 0) submitForm();
-                    }
-                "
+                @change="handleFileInputChange"
             />
 
             <div class="fixed bottom-8 right-8 z-50 flex flex-col items-center justify-end gap-4">
@@ -143,8 +159,8 @@ const toggleSelection = (imageId: number) => {
                     <Plus />
                 </button>
 
-                <div v-if="form.errors.images" class="bg-destructive mt-2 text-sm">
-                    {{ form.errors.images }}
+                <div v-if="form.errors.image" class="bg-destructive mt-2 text-sm">
+                    {{ form.errors.image }}
                 </div>
             </div>
 
@@ -201,5 +217,40 @@ const toggleSelection = (imageId: number) => {
                 </div>
             </div>
         </form>
+
+        <BaseModal :open="showModal" @cancel="close">
+            <h2 class="mb-4 text-lg font-bold">Sollen Ordner-Standards auf die neuen Bilder angewandt werden?</h2>
+            <div class="flex flex-col gap-3">
+                <button
+                    @click="confirmUpload(FolderOperation.SAVE)"
+                    class="button-primary h-10 rounded-md px-4 align-middle"
+                >
+                    Bilder unverändert hochladen
+                </button>
+                <button
+                    @click="confirmUpload(FolderOperation.PROPAGATE)"
+                    class="button-primary h-10 rounded-md px-4 align-middle"
+                >
+                    Bilderdaten mit Ordner-Standards überschreiben
+                </button>
+                <button
+                    @click="confirmUpload(FolderOperation.MERGE)"
+                    class="button-primary h-10 rounded-md px-4 align-middle"
+                >
+                    Fehlende Bilderdaten mit Ordner-Standards besetzen
+                </button>
+                <button
+                    @click="
+                        () => {
+                            pendingFiles = [];
+                            close();
+                        }
+                    "
+                    class="button-secondary h-10 w-full rounded-md px-4 align-middle"
+                >
+                    Abbrechen
+                </button>
+            </div>
+        </BaseModal>
     </MainLayout>
 </template>

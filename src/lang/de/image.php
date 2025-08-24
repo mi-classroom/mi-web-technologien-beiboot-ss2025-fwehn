@@ -2,7 +2,7 @@
 
 return [
     "store" => [
-        "success" => "Bilder wurde erfolgreich hochgeladen!",
+        "success" => ":imageName wurde erfolgreich hochgeladen!",
     ],
     "updateSelection" => [
         "success" => "Bilder erfolgreich aktualisiert!",

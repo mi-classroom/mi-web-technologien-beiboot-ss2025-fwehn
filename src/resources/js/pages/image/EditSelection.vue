@@ -54,32 +54,31 @@ const prevImage = () => {
 };
 
 const currentImage = computed(() => props.images[currentImageIndex.value]);
+
+function handleSubmit() {
+    form.transform((data: Record<string, string | null>) => {
+        const filtered: Record<string, any> = {};
+
+        for (const key in data) {
+            if (key in editable.value) {
+                filtered[key] = data[key];
+            }
+        }
+
+        return { name_prefix: data.name_prefix, ...filtered };
+    });
+
+    form.put(route('images.update-selection', { images: imageIds }), {
+        preserveState: true,
+        onSuccess: () => {},
+    });
+}
 </script>
 
 <template>
     <Head title="Images" />
     <MainLayout :breadcrumbs="breadcrumbs">
-        <form
-            @submit.prevent="
-                () => {
-                    form.transform((data) => {
-                        const filtered: Record<string, any> = {};
-                        for (const key in data) {
-                            if (key === 'name_prefix' || Object.prototype.hasOwnProperty.call(editable, key)) {
-                                filtered[key] = data[key];
-                            }
-                        }
-                        return filtered;
-                    });
-
-                    form.put(route('images.update-selection', { images: imageIds }), {
-                        preserveState: true,
-                        onSuccess: () => {},
-                    });
-                }
-            "
-            class="flex h-full flex-col items-stretch justify-stretch gap-2"
-        >
+        <form @submit.prevent="handleSubmit" class="flex h-full flex-col items-stretch justify-stretch gap-2">
             <div class="flex flex-row gap-2 px-8 pl-4 pt-4">
                 <TextInput
                     id="name_prefix"

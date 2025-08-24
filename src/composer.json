@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.10.1",
         "tightenco/ziggy": "^2.4",
         "ext-gd": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-fileinfo": "*"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
