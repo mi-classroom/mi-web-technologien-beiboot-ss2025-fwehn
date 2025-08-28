@@ -36,8 +36,8 @@ class FolderController extends Controller
     public function store(FolderRequest $request)
     {
         $validated = $request->validated();
-        $folder = Folder::create($validated);
-        return redirect()->route('folders.edit', $folder)->with('status.success', __('folder.store.success'));
+        $folder = Folder::create([...$validated, "user_id" => auth()->user()->id]);
+        return redirect()->route('folders.select', $folder)->with('status.success', __('folder.store.success'));
     }
 
     /**

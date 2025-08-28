@@ -25,6 +25,7 @@ class FolderRequest extends FormRequest
     {
         return [
             "name" => "required|string",
+            "parent_folder_id" => "nullable|integer|exists:folders,id",
 
             "operation" => ["required", Rule::enum(FolderOperation::class)],
 
