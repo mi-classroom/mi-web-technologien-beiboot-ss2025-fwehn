@@ -18,19 +18,19 @@ class FolderSeeder extends Seeder
         Folder::factory()
             ->count(3)
             ->for($user)
-            ->create()
+            ->create(['name' => '1. Ebene'])
             ->each(function ($rootFolder) use ($user) {
 
                 Folder::factory()
                     ->count(2)
                     ->for($user)
-                    ->create(['parent_folder_id' => $rootFolder->id])
+                    ->create(['name' => '2. Ebene', 'parent_folder_id' => $rootFolder->id])
                     ->each(function ($childFolder) use ($user) {
 
                         Folder::factory()
                             ->count(2)
                             ->for($user)
-                            ->create(['parent_folder_id' => $childFolder->id]);
+                            ->create(['name' => '3. Ebene', 'parent_folder_id' => $childFolder->id]);
                     });
             });
     }

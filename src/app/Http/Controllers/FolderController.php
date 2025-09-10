@@ -195,9 +195,10 @@ class FolderController extends Controller
         //
     }
 
-    public function select(Request $request, Folder $folder)
+    public function select(Request $request, Folder $folder = null)
     {
-        session(['current_folder_id' => $folder->id]);
+        if (is_null($folder)) session(['current_folder_id' => null]);
+        else session(['current_folder_id' => $folder->id]);
 
         if ($request->route()->getName() === 'folders.select-and-edit') {
             return redirect()->route('folders.edit', $folder);

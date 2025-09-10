@@ -14,14 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Storage::disk('public')->deleteDirectory('originals');
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
         $this->call([
+            BaseSeeder::class,
             FolderSeeder::class,
             ImageSeeder::class,
         ]);

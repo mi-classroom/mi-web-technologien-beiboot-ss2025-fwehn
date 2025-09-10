@@ -10,6 +10,7 @@ Route::get('/', function () {
 })->name('default');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('folders/select-none', [FolderController::class, 'select'])->name('folders.select-none');
     Route::get('folders/{folder}/select', [FolderController::class, 'select'])->name('folders.select');
     Route::get('folders/{folder}/export', [FolderController::class, 'export'])->name('folders.export');
     Route::get('folders/{folder}/select-and-edit', [FolderController::class, 'select'])->name('folders.select-and-edit');

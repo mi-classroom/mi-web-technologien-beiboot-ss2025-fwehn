@@ -18,7 +18,7 @@ class ImageSeeder extends Seeder
      */
     public function run(): void
     {
-        $folder = Folder::first();
+//        $folder = Folder::first();
         $user = User::first();
 
         $seedImagesPath = database_path('seeders/images');
@@ -53,7 +53,7 @@ class ImageSeeder extends Seeder
                     'height' => $height,
                     'original_path' => $path,
                     'user_id' => $user->id,
-                    'folder_id' => $folder->id,
+                    'folder_id' => null,
                 ],
                 $iptc
             ));

@@ -9,7 +9,7 @@ import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Images', href: '/images' }];
-defineProps(['images']);
+const { images } = defineProps(['images']);
 
 const isDragging = ref(false);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -87,13 +87,28 @@ const confirmUpload = async (operation: FolderOperation) => {
 };
 
 const selectedImages = ref<number[]>([]);
+const lastSelectedIndex = ref<number | null>(null);
 
-const toggleSelection = (imageId: number) => {
-    const index = selectedImages.value.indexOf(imageId);
-    if (index === -1) {
-        selectedImages.value.push(imageId);
+const toggleSelection = (imageId: number, event?: MouseEvent) => {
+    const index = images.findIndex((img: any) => img.id === imageId);
+
+    if (event?.shiftKey && lastSelectedIndex.value !== null) {
+        const start = Math.min(lastSelectedIndex.value, index);
+        const end = Math.max(lastSelectedIndex.value, index);
+        const rangeIds = images.slice(start, end + 1).map((img: any) => img.id);
+        const merged = new Set([...selectedImages.value, ...rangeIds]);
+        selectedImages.value = Array.from(merged);
+    } else if (event?.ctrlKey || event?.metaKey) {
+        const pos = selectedImages.value.indexOf(imageId);
+        if (pos === -1) {
+            selectedImages.value.push(imageId);
+        } else {
+            selectedImages.value.splice(pos, 1);
+        }
+        lastSelectedIndex.value = index;
     } else {
-        selectedImages.value.splice(index, 1);
+        selectedImages.value = [imageId];
+        lastSelectedIndex.value = index;
     }
 };
 </script>
@@ -133,7 +148,11 @@ const toggleSelection = (imageId: number) => {
                 <Link
                     as="button"
                     v-if="selectedImages.length > 0"
-                    :href="route('images.edit-selection', { images: selectedImages })"
+                    :href="
+                        selectedImages.length === 1
+                            ? route('images.edit', selectedImages[0])
+                            : route('images.edit-selection', { images: selectedImages })
+                    "
                     class="button-primary rounded-full p-4 shadow-lg transition-all"
                 >
                     <Pencil />
@@ -142,7 +161,11 @@ const toggleSelection = (imageId: number) => {
                 <Link
                     as="button"
                     v-if="selectedImages.length > 0"
-                    :href="route('images.destroy-selection', { images: selectedImages })"
+                    :href="
+                        selectedImages.length === 1
+                            ? route('images.destroy', selectedImages[0])
+                            : route('images.destroy-selection', { images: selectedImages })
+                    "
                     method="delete"
                     class="button-primary rounded-full p-4 shadow-lg transition-all"
                     @success="selectedImages = []"
@@ -170,7 +193,7 @@ const toggleSelection = (imageId: number) => {
                     :key="image.id"
                     class="flex w-full cursor-pointer select-none rounded-md border-m"
                     :class="selectedImages.includes(image.id) ? 'border-primary' : 'border-warm-medium'"
-                    @click="toggleSelection(image.id)"
+                    @click="(e) => toggleSelection(image.id, e)"
                 >
                     <input
                         type="checkbox"
@@ -181,7 +204,13 @@ const toggleSelection = (imageId: number) => {
 
                     <img
                         class="h-40 min-h-40 w-40 min-w-40 bg-warm-medium object-contain p-0"
-                        :src="image.preview_url"
+                        :src="route('images.preview', { image: image.id, w: 400 })"
+                        :srcset="`
+                            ${route('images.preview', { image: image.id, w: 400 })} 400w,
+                            ${route('images.preview', { image: image.id, w: 800 })} 800w,
+                            ${route('images.preview', { image: image.id, w: 1200 })} 1200w
+                        `"
+                        sizes="(max-width: 640px) 100vw, 400px"
                         :alt="image.name"
                         loading="lazy"
                     />

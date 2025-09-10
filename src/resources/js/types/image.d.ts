@@ -1,5 +1,4 @@
-type Image = {
-    id?: number;
+interface Image extends Iptc {
+    readonly id?: number;
     name?: string;
-    [key: string]: string;
-};
+}

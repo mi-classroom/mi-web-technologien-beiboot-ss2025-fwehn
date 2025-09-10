@@ -109,10 +109,17 @@ class ImageController extends Controller
             ->with('status.success', __('image.store.success', ["imageName" => $image->name]));
     }
 
-    public function preview(Image $image)
+    public function preview(Request $request, Image $image)
     {
 
         Gate::authorize('view', $image);
+
+//        $validated = $request->validate([
+//            "w" => "nullable|integer",
+//        ]);
+
+//        dump($validated["w"]);
+
 
         if (empty($image->original_path)) {
             abort(404, 'Bildpfad fehlt oder ist ungültig');

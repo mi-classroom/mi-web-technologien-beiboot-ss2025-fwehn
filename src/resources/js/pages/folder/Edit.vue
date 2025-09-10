@@ -8,11 +8,10 @@ import type { BreadcrumbItem } from '@/types';
 import { FolderOperation } from '@/types/enums';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
-import { Folder } from 'lucide-vue-next';
 import { ref } from 'vue';
 
-const props = defineProps(['folder']);
-const breadcrumbs: BreadcrumbItem[] = [{ title: props.folder.name, href: route('folders.edit', props.folder.id) }];
+const props = defineProps<{ folder: Folder }>();
+const breadcrumbs: BreadcrumbItem[] = [{ title: props.folder.name!, href: route('folders.edit', props.folder.id) }];
 
 const iptcFields = Object.fromEntries(
     Object.entries(props.folder as Record<string, string>).filter(
@@ -20,7 +19,7 @@ const iptcFields = Object.fromEntries(
     ),
 );
 
-const form = useForm<{ [key: string]: string }>(props.folder);
+const form = useForm<Folder>(props.folder);
 
 const editable = ref<Record<string, string>>({ ...iptcFields });
 const options = Object.keys(props.folder)
@@ -85,12 +84,12 @@ function confirmSubmit(operation: FolderOperation) {
                             Submit
                         </button>
                         <button
-                            @click.prevent="form.delete(route('folders.destroy', folder))"
+                            @click.prevent="form.delete(route('folders.destroy', folder.id))"
                             class="button-secondary h-10 rounded-md px-4 align-middle"
                         >
                             Delete
                         </button>
-                        <DownloadButton :href="route('folders.export', folder)" />
+                        <DownloadButton :href="route('folders.export', folder.id)" />
                     </div>
                 </div>
 
