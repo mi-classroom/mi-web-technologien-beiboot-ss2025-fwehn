@@ -43,7 +43,7 @@ withDefaults(defineProps<Props>(), {
                     </template>
                 </div>
 
-                <ImageFilterDropdown />
+                <ImageFilterDropdown v-if="route().current('images.index')" />
             </div>
             <div class="absolute bottom-0 left-64 right-0 top-12">
                 <slot />

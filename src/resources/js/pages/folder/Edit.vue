@@ -8,6 +8,7 @@ import type { BreadcrumbItem } from '@/types';
 import { FolderOperation } from '@/types/enums';
 import { Head, useForm } from '@inertiajs/vue3';
 import { trans } from 'laravel-vue-i18n';
+import { Folder } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 const props = defineProps<{ folder: Folder }>();

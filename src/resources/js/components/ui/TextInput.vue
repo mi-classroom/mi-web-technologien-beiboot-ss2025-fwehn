@@ -19,28 +19,35 @@ const emits = defineEmits<{
 
 const modelValue = useVModel(props, 'modelValue', emits, {
     passive: true,
-    defaultValue: props.defaultValue
+    defaultValue: props.defaultValue,
 });
 </script>
-
 
 <template>
     <div :class="class">
         <div class="relative mt-2">
-            <input :type="password ? 'password' : 'text'"
-                   :id="id"
-                   placeholder=" "
-                   v-model="modelValue"
-                   :class="cn(
-                       'block py-2.5 pl-2 w-full text-lg  bg-transparent   focus:outline-none focus:ring-0 border-s rounded  font-semibold appearance-none',
-                        !!error ? 'text-secondary border-secondary': 'text-warm-dark border-warm-medium focus:border-primary peer'
-                   )"
+            <input
+                :type="password ? 'password' : 'text'"
+                :id="id"
+                placeholder=" "
+                v-model="modelValue"
+                :class="
+                    cn(
+                        'block w-full appearance-none rounded border-s bg-transparent py-2.5 pl-2 text-lg font-semibold focus:outline-none focus:ring-0',
+                        !!error
+                            ? 'border-secondary text-secondary'
+                            : 'peer border-warm-medium text-warm-dark focus:border-primary',
+                    )
+                "
             />
-            <label :for="id"
-                   :class="cn(
-                       'absolute select-none text-lg ml-1 bg-warm-light px-1 duration-300 transform -translate-y-7 scale-75 top-3 z-10 origin-[0] peer-focus:start-0  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-7 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto',
-                       !!error ? 'text-secondary' : 'text-warm-dark peer-focus:text-primary'
-                   )"
+            <label
+                :for="id"
+                :class="
+                    cn(
+                        'absolute top-3 z-10 ml-1 origin-[0] -translate-y-7 scale-75 transform select-none bg-warm-light px-1 text-lg duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:start-0 peer-focus:-translate-y-7 peer-focus:scale-75 rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4',
+                        !!error ? 'text-secondary' : 'text-warm-dark peer-focus:text-primary',
+                    )
+                "
             >
                 {{ label }}
             </label>
@@ -51,6 +58,4 @@ const modelValue = useVModel(props, 'modelValue', emits, {
     </div>
 </template>
 
-
-<style scoped>
-</style>
+<style scoped></style>

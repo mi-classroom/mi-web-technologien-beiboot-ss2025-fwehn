@@ -1,11 +1,11 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     href: {
         type: String,
-        required: true
-    }
+        required: true,
+    },
 });
 
 const format = ref('jpg');
@@ -18,19 +18,16 @@ const fullHref = computed(() => {
 </script>
 
 <template>
-    <div class="inline-flex rounded-md shadow-sm overflow-hidden h-10 group">
+    <div class="group inline-flex h-10 overflow-hidden rounded-md shadow-sm">
         <a
             :href="fullHref"
-            class="px-4 text-sm font-medium text-warm-dark bg-lightest hover:bg-light hover:text-primary
-             focus:ring-2 focus:ring-primary h-full flex items-center"
+            class="flex h-full items-center bg-lightest px-4 text-sm font-medium text-warm-dark hover:bg-light hover:text-primary focus:ring-2 focus:ring-primary"
         >
             Download
         </a>
         <select
             v-model="format"
-            class="px-1 text-sm font-medium text-warm-dark bg-lightest border-l-s border-warm-medium h-full
-             group-hover:bg-light group-hover:text-primary
-             group-focus:outline-none "
+            class="h-full border-l-s border-warm-medium bg-lightest px-1 text-sm font-medium text-warm-dark group-hover:bg-light group-hover:text-primary group-focus:outline-none"
         >
             <option value="jpg">.jpg</option>
             <option value="png">.png</option>
