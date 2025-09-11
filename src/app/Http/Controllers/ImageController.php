@@ -7,6 +7,7 @@ use App\Http\Requests\ImageRequest;
 use App\Http\Requests\ImageSelectionRequest;
 use App\Models\Folder;
 use App\Models\Image;
+use App\Models\IptcDataEntry;
 use App\Facades\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,6 +22,7 @@ class ImageController extends Controller
     public function index(Request $request)
     {
         $query = Image::query()
+            ->with(['iptc'])
             ->where('user_id', auth()->id())
             ->latest();
 
@@ -32,38 +34,17 @@ class ImageController extends Controller
             $query->whereNull('folder_id');
         }
 
-        $filterableFields = [
-            'iptc_object_attribute_reference',
-            'iptc_object_name',
-            'iptc_subject_reference',
-            'iptc_keywords',
-            'iptc_special_instructions',
-            'iptc_date_created',
-            'iptc_time_created',
-            'iptc_byline',
-            'iptc_byline_title',
-            'iptc_city',
-            'iptc_sub_location',
-            'iptc_province_state',
-            'iptc_country_primary_location_code',
-            'iptc_country_primary_location_name',
-            'iptc_original_transmission_reference',
-            'iptc_headline',
-            'iptc_credit',
-            'iptc_source',
-            'iptc_copyright_notice',
-            'iptc_caption_abstract',
-            'iptc_writer_editor',
-            'iptc_application_record_version',
-        ];
+        $filterableFields = (new IptcDataEntry())->getFillable();
 
         foreach ($request->all() as $field => $value) {
             if (in_array($field, $filterableFields, true)) {
-                if ($value === 'true' || $value === true) {
-                    $query->whereNotNull($field);
-                } elseif ($value === 'false' || $value === false) {
-                    $query->whereNull($field);
-                }
+                $query->whereHas('iptc', function ($q) use ($field, $value) {
+                    if ($value === 'true' || $value === true) {
+                        $q->whereNotNull($field);
+                    } elseif ($value === 'false' || $value === false) {
+                        $q->whereNull($field);
+                    }
+                });
             }
         }
 
@@ -103,31 +84,31 @@ class ImageController extends Controller
 
         $iptc = ExifToolService::read(Storage::path($path));
 
-        $image = Image::create(array_merge(
-            [
-                'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
-                'width' => $width,
-                'height' => $height,
-                'original_path' => $path,
-                'user_id' => auth()->id(),
-                'folder_id' => $folderId,
-            ],
-            $iptc
-        ));
+        $image = Image::create([
+            'name' => pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME),
+            'width' => $width,
+            'height' => $height,
+            'original_path' => $path,
+            'user_id' => auth()->id(),
+            'folder_id' => $folderId,
+        ]);
 
-        $folder = Folder::find($folderId);
+        if (!empty($iptc)) {
+            $image->iptc()->create($iptc);
+        }
+
+        $folder = Folder::with('iptc')->find($folderId);
         $operation = FolderOperation::tryFrom($validated["operation"]);
 
         if ($folder && !in_array($operation, [FolderOperation::SAVE, null])) {
-            $folderIPTC = collect($folder->getAttributes())
-                ->filter(fn($value, $key) => str_starts_with($key, 'iptc_'))
-                ->all();
+            $folderIPTC = $folder->iptc?->only($image->iptc()->getModel()->getFillable()) ?? [];
 
             match ($operation) {
-                FolderOperation::PROPAGATE => $image->update($folderIPTC),
-                FolderOperation::MERGE => $image->update(array_filter(
+                FolderOperation::PROPAGATE => $image->iptc()->update($folderIPTC),
+                FolderOperation::MERGE => $image->iptc()->update(array_filter(
                     $folderIPTC,
-                    fn($key) => $image->$key === null, ARRAY_FILTER_USE_KEY
+                    fn($key) => $image->iptc->$key === null,
+                    ARRAY_FILTER_USE_KEY
                 )),
                 default => null
             };
@@ -136,7 +117,7 @@ class ImageController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'status' => 'success',
-                'image' => $image
+                'image' => $image->load('iptc')
             ]);
         }
 
@@ -184,7 +165,7 @@ class ImageController extends Controller
     public function edit(Image $image)
     {
         return Inertia::render('image/Edit', [
-            "image" => $image,
+            "image" => $image->load('iptc'),
         ]);
     }
 
@@ -192,7 +173,7 @@ class ImageController extends Controller
     {
         $validated = $request->validated();
 
-        $images = Image::whereIn('id', $validated['images'])->get();
+        $images = Image::with('iptc')->whereIn('id', $validated['images'])->get();
 
         return Inertia::render('image/EditSelection', [
             "images" => $images,
@@ -207,32 +188,30 @@ class ImageController extends Controller
         $validated = $request->validated();
 
         $image->update($validated);
+
+        if (!empty($validated["iptc"])) {
+            $image->iptc()->updateOrCreate([], $validated["iptc"]);
+        }
+
         return redirect()->route('images.edit', $image)->with('status.success', __('image.update.success'));
     }
 
     public function updateSelection(ImageSelectionRequest $request)
     {
+//        TODO fortlaufende bildbenennung
+
         $validated = $request->validated();
 
-        $images = Image::whereIn('id', $validated['images'])->get();
-
-        $iptcFields = collect($validated)->except(['images', 'name_prefix'])->filter(function ($value) {
-            return $value !== null;
-        });
+        $images = Image::with('iptc')->whereIn('id', $validated['images'])->get();
 
         foreach ($images as $image) {
-            $updateData = $iptcFields->toArray();
-
-            if (!empty($validated['name_prefix'])) {
-                $updateData['name'] = $validated['name_prefix'] . $image->name;
+            if (!empty($validated['iptc'])) {
+                $image->iptc()->updateOrCreate([], $validated['iptc']);
             }
-
-            $image->update($updateData);
         }
 
         return redirect()->route('images.index')->with('status.success', 'Bilder erfolgreich aktualisiert.');
     }
-
 
     public function export(Request $request, Image $image)
     {
@@ -240,12 +219,10 @@ class ImageController extends Controller
             'format' => "nullable|in:avif,jpg,jpeg,png,webp",
         ]);
 
-        $format = $validated['format'] ?? pathinfo($image->original_path, PATHINFO_EXTENSION);
-        $format = strtolower($format);
-
+        $format = strtolower($validated['format'] ?? pathinfo($image->original_path, PATHINFO_EXTENSION));
         $originalPath = Storage::path($image->original_path);
 
-        ExifToolService::write($originalPath, $image->iptc());
+        ExifToolService::write($originalPath, $image->iptc?->toArray() ?? []);
 
         if ($format === strtolower(pathinfo($originalPath, PATHINFO_EXTENSION))) {
             return Storage::disk('public')->download(
@@ -267,30 +244,17 @@ class ImageController extends Controller
                 abort(400, 'Unsupported image format.');
         }
 
-        if (!$img) {
-            abort(500, 'Failed to load image.');
-        }
+        if (!$img) abort(500, 'Failed to load image.');
 
         $tempPath = sys_get_temp_dir() . '/' . uniqid('export_', true) . '.' . $format;
 
-        switch ($format) {
-            case 'avif':
-                imageavif($img, $tempPath);
-                break;
-            case 'jpeg':
-            case 'jpg':
-                imagejpeg($img, $tempPath);
-                break;
-            case 'png':
-                imagepng($img, $tempPath);
-                break;
-            case 'webp':
-                imagewebp($img, $tempPath);
-                break;
-            default:
-                imagedestroy($img);
-                abort(400, 'Unsupported target format.');
-        }
+        match ($format) {
+            'avif' => imageavif($img, $tempPath),
+            'jpeg', 'jpg' => imagejpeg($img, $tempPath),
+            'png' => imagepng($img, $tempPath),
+            'webp' => imagewebp($img, $tempPath),
+            default => abort(400, 'Unsupported target format.'),
+        };
 
         imagedestroy($img);
 
@@ -304,7 +268,7 @@ class ImageController extends Controller
             'format' => 'required|in:avif,jpg,jpeg,png,webp',
         ]);
 
-        $images = Image::whereIn('id', $validated['images'])->get();
+        $images = Image::with('iptc')->whereIn('id', $validated['images'])->get();
 
         if ($images->isEmpty()) {
             return redirect()->back()->withErrors(['images' => 'Keine Bilder ausgewählt.']);
@@ -313,29 +277,20 @@ class ImageController extends Controller
         $zipFileName = 'export_' . now()->timestamp . '_' . Str::random(8) . '.zip';
         $zipFilePath = storage_path('app/temp/' . $zipFileName);
 
-        if (!file_exists(dirname($zipFilePath))) {
-            mkdir(dirname($zipFilePath), 0755, true);
-        }
+        if (!file_exists(dirname($zipFilePath))) mkdir(dirname($zipFilePath), 0755, true);
 
         $zip = new ZipArchive();
-
-        if ($zip->open($zipFilePath, ZipArchive::CREATE) !== true) {
-            abort(500, 'ZIP-Datei konnte nicht erstellt werden.');
-        }
+        if ($zip->open($zipFilePath, ZipArchive::CREATE) !== true) abort(500, 'ZIP-Datei konnte nicht erstellt werden.');
 
         foreach ($images as $image) {
             $originalPath = Storage::path($image->original_path);
-            $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
-            $format = $extra['format'];;
+            $format = $extra['format'];
 
-            ExifToolService::write($originalPath, $image->iptc());
-
+            ExifToolService::write($originalPath, $image->iptc?->toArray() ?? []);
             $tempImagePath = $originalPath;
 
-            if (strtolower($extension) !== $format) {
-                $tempImagePath = sys_get_temp_dir() . '/' . uniqid('export_', true) . '.' . $format;
-
-                switch (strtolower($extension)) {
+            if (strtolower(pathinfo($originalPath, PATHINFO_EXTENSION)) !== $format) {
+                switch (strtolower(pathinfo($originalPath, PATHINFO_EXTENSION))) {
                     case 'jpeg':
                     case 'jpg':
                         $img = imagecreatefromjpeg($originalPath);
@@ -347,34 +302,20 @@ class ImageController extends Controller
                         continue 2;
                 }
 
-                if (!$img) {
-                    continue;
-                }
+                if (!$img) continue;
 
-                switch ($format) {
-                    case 'avif':
-                        imageavif($img, $tempImagePath);
-                        break;
-                    case 'jpeg':
-                    case 'jpg':
-                        imagejpeg($img, $tempImagePath);
-                        break;
-                    case 'png':
-                        imagepng($img, $tempImagePath);
-                        break;
-                    case 'webp':
-                        imagewebp($img, $tempImagePath);
-                        break;
-                    default:
-                        imagedestroy($img);
-                        continue 2;
-                }
+                match ($format) {
+                    'avif' => imageavif($img, $tempImagePath),
+                    'jpeg', 'jpg' => imagejpeg($img, $tempImagePath),
+                    'png' => imagepng($img, $tempImagePath),
+                    'webp' => imagewebp($img, $tempImagePath),
+                    default => imagedestroy($img)
+                };
 
                 imagedestroy($img);
             }
 
-            $filenameInZip = $image->name . '.' . $format;
-            $zip->addFile($tempImagePath, $filenameInZip);
+            $zip->addFile($tempImagePath, $image->name . '.' . $format);
         }
 
         $zip->close();
@@ -389,6 +330,7 @@ class ImageController extends Controller
     {
         Gate::authorize('delete', $image);
 
+        $image->iptc()?->delete();
         $path = $image->original_path;
         $image->delete();
         Storage::disk('public')->delete($path);
@@ -400,15 +342,13 @@ class ImageController extends Controller
     {
         $validated = $request->validated();
 
-        $images = Image::whereIn('id', $validated['images'])->get();
+        $images = Image::with('iptc')->whereIn('id', $validated['images'])->get();
 
         foreach ($images as $image) {
             Gate::authorize('delete', $image);
-
-            $path = $image->original_path;
+            $image->iptc()?->delete();
+            Storage::disk('public')->delete($image->original_path);
             $image->delete();
-
-            Storage::disk('public')->delete($path);
         }
 
         return redirect()->route('images.index')->with('status.success', __('image.destroySelection.success'));

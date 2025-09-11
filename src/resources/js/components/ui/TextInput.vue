@@ -11,6 +11,7 @@ const props = defineProps<{
     error?: string;
     id: string;
     password?: boolean;
+    disabled?: boolean;
 }>();
 
 const emits = defineEmits<{
@@ -24,10 +25,11 @@ const modelValue = useVModel(props, 'modelValue', emits, {
 </script>
 
 <template>
-    <div :class="class">
+    <div :class="props.class">
         <div class="relative mt-2">
             <input
                 :type="password ? 'password' : 'text'"
+                :disabled="disabled"
                 :id="id"
                 placeholder=" "
                 v-model="modelValue"

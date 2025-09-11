@@ -216,22 +216,22 @@ const toggleSelection = (imageId: number, event?: MouseEvent) => {
                     />
                     <div class="flex h-full w-full flex-col justify-center pl-4">
                         <h1 class="text-xl font-semibold">{{ image.name }}</h1>
-                        <p>{{ image.iptc_date_created }}</p>
+                        <p>{{ image.iptc?.iptc_date_created ?? '-' }}</p>
                     </div>
                     <div class="flex items-center justify-center px-8">
                         <span
                             :class="
                                 cn(
                                     'rounded-full border-2 px-2 py-1 text-center text-lightest',
-                                    image.iptc_fill_percent <= 33
+                                    (image.fill_percent ?? 0) <= 33
                                         ? 'bg-secondary'
-                                        : image.iptc_fill_percent < 100
+                                        : (image.fill_percent ?? 0) < 100
                                           ? 'bg-primary'
                                           : 'bg-tertiary',
                                 )
                             "
                         >
-                            {{ image.iptc_fill_percent }}%
+                            {{ image.fill_percent ?? 0 }}%
                         </span>
                     </div>
                     <div class="flex h-40 items-center justify-center gap-4 pr-10">

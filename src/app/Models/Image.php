@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Image extends Model
 {
@@ -14,35 +15,30 @@ class Image extends Model
         'user_id',
         'original_path',
         'folder_id',
-
-        'iptc_object_attribute_reference',
-        'iptc_object_name',
-        'iptc_subject_reference',
-        'iptc_special_instructions',
-        'iptc_date_created',
-        'iptc_time_created',
-        'iptc_byline',
-        'iptc_byline_title',
-        'iptc_city',
-        'iptc_sub_location',
-        'iptc_province_state',
-        'iptc_country_primary_location_code',
-        'iptc_country_primary_location_name',
-        'iptc_original_transmission_reference',
-        'iptc_headline',
-        'iptc_credit',
-        'iptc_source',
-        'iptc_copyright_notice',
-        'iptc_caption_abstract',
-        'iptc_writer_editor',
-        'iptc_application_record_version'
     ];
 
-    protected $appends = ['preview_url', 'iptc_fill_percent'];
+    protected $appends = ['preview_url', 'fill_percent'];
 
     public function getPreviewUrlAttribute(): string
     {
         return route('images.preview', ['image' => $this->id]);
+    }
+
+    public function getFillPercentAttribute(): int
+    {
+        $iptc = $this->iptc;
+
+        if (!$iptc) return 0;
+
+        $iptcFields = collect($iptc->getAttributes())->filter(fn($value, $key) => str_starts_with($key, 'iptc_'));
+
+        $total = $iptcFields->count();
+
+        if ($total === 0) return 0;
+
+        $filled = $iptcFields->filter(fn($value) => !is_null($value) && $value !== '')->count();
+
+        return (int)round(($filled / $total) * 100);
     }
 
     public function user(): BelongsTo
@@ -50,28 +46,9 @@ class Image extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function iptc(): array
+    public function iptc(): MorphOne
     {
-        return collect($this->attributes)
-            ->filter(fn($_, $key) => str_starts_with($key, 'iptc_'))
-            ->toArray();
+        return $this->morphOne(IptcDataEntry::class, 'iptcable');
     }
 
-    public function getIptcFillPercentAttribute(): int
-    {
-        $iptcFields = collect($this->attributes)
-            ->filter(fn($_, $key) => str_starts_with($key, 'iptc_'));
-
-        $total = $iptcFields->count();
-
-        if ($total === 0) {
-            return 0;
-        }
-
-        $filled = $iptcFields->filter(function ($value) {
-            return !is_null($value) && $value !== '';
-        })->count();
-
-        return (int)round(($filled / $total) * 100);
-    }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import IptcInputs from '@/components/iptc/IptcInputs.vue';
 import DownloadButton from '@/components/ui/DownloadButton.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
@@ -13,7 +14,10 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: `/images/${props.image.id}`,
     },
 ];
-const form = useForm({ ...props.image });
+const form = useForm({
+    name: props.image.name,
+    iptc: { ...props.image.iptc },
+});
 </script>
 
 <template>
@@ -47,22 +51,11 @@ const form = useForm({ ...props.image });
                     </div>
                 </div>
 
-                <div class="max-w-1/2 flex h-full max-h-full w-1/2 flex-col gap-2 overflow-y-auto p-4">
-                    <div
-                        v-for="iptcKey in Object.keys(form).filter(
-                            (key) => key.startsWith('iptc') && key !== 'iptc_fill_percent',
-                        )"
-                        :key="iptcKey"
-                        class="grid gap-3"
-                    >
-                        <TextInput
-                            v-model="form[iptcKey]"
-                            :id="iptcKey"
-                            :label="$t(`iptc.` + iptcKey)"
-                            :error="form.errors[iptcKey]"
-                        />
-                    </div>
-                </div>
+                <IptcInputs
+                    v-model="form.iptc"
+                    :errors="form.errors"
+                    class="max-w-1/2 flex h-full max-h-full w-1/2 flex-col gap-2 overflow-y-auto p-4"
+                />
             </div>
         </form>
     </MainLayout>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 
 class Folder extends Model
 {
@@ -15,23 +16,6 @@ class Folder extends Model
         'name',
         'user_id',
         'parent_folder_id',
-
-        'iptc_special_instructions',
-        'iptc_date_created',
-        'iptc_byline',
-        'iptc_byline_title',
-        'iptc_city',
-        'iptc_sub_location',
-        'iptc_province_state',
-        'iptc_country_primary_location_code',
-        'iptc_country_primary_location_name',
-        'iptc_original_transmission_reference',
-        'iptc_headline',
-        'iptc_credit',
-        'iptc_source',
-        'iptc_copyright_notice',
-        'iptc_caption_abstract',
-        'iptc_writer_editor',
     ];
 
     public function user(): BelongsTo
@@ -44,7 +28,7 @@ class Folder extends Model
         return $this->belongsTo(Folder::class, 'parent_folder_id');
     }
 
-    public function  childFolders(): HasMany
+    public function childFolders(): HasMany
     {
         return $this->hasMany(Folder::class, 'parent_folder_id');
     }
@@ -52,5 +36,10 @@ class Folder extends Model
     public function images(): HasMany
     {
         return $this->hasMany(Image::class, 'folder_id');
+    }
+
+    public function iptc(): MorphOne
+    {
+        return $this->morphOne(IptcDataEntry::class, 'iptcable');
     }
 }

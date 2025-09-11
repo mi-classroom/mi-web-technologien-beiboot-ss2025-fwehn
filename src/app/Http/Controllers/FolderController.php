@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\FolderOperation;
 use App\Http\Requests\FolderRequest;
 use App\Models\Folder;
+use App\Models\IptcDataEntry;
 use App\Facades\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -54,7 +55,7 @@ class FolderController extends Controller
     public function edit(Folder $folder)
     {
         return Inertia::render('folder/Edit', [
-            'folder' => $folder,
+            'folder' => $folder->load('iptc'),
             'current_folder_id' => $folder->id
         ]);
     }
@@ -68,27 +69,28 @@ class FolderController extends Controller
         $folder->update($validated);
 
         $operation = FolderOperation::tryFrom($validated["operation"]);
+
         switch ($operation) {
             case FolderOperation::PROPAGATE:
-                $folder->images()->update(array_filter(
-                    $validated,
-                    fn($key) => Str::startsWith($key, 'iptc_'),
-                    ARRAY_FILTER_USE_KEY
-                ));
-                break;
-            case FolderOperation::MERGE:
                 foreach ($folder->images as $image) {
-                    $updateData = array_filter(
-                        $validated,
-                        fn($key) => Str::startsWith($key, 'iptc_') && $image->$key === null,
-                        ARRAY_FILTER_USE_KEY
-                    );
-
-                    if (!empty($updateData)) {
-                        $image->update($updateData);
+                    if (!empty($validated['iptc'])) {
+                        $image->iptc()->updateOrCreate([], $validated['iptc']);
                     }
                 }
                 break;
+
+            case FolderOperation::MERGE:
+                foreach ($folder->images as $image) {
+                    $updateData = $validated['iptc']
+                        ->filter(fn($value, $key) => $image->iptc?->$key === null)
+                        ->toArray();
+
+                    if (!empty($updateData)) {
+                        $image->iptc()->updateOrCreate([], $updateData);
+                    }
+                }
+                break;
+
             case FolderOperation::SAVE:
             default:
         }
@@ -109,7 +111,7 @@ class FolderController extends Controller
             'format' => 'required|in:avif,jpg,jpeg,png,webp',
         ]);
 
-        $images = $folder->images()->get();
+        $images = $folder->images()->with('iptc')->get();
 
         if ($images->isEmpty()) {
             return redirect()->back()->withErrors(['images' => 'Keine Bilder ausgewählt.']);
@@ -123,7 +125,6 @@ class FolderController extends Controller
         }
 
         $zip = new ZipArchive();
-
         if ($zip->open($zipFilePath, ZipArchive::CREATE) !== true) {
             abort(500, 'ZIP-Datei konnte nicht erstellt werden.');
         }
@@ -131,10 +132,9 @@ class FolderController extends Controller
         foreach ($images as $image) {
             $originalPath = Storage::path($image->original_path);
             $extension = pathinfo($originalPath, PATHINFO_EXTENSION);
-            $format = $extra['format'];;
+            $format = $extra['format'];
 
-            ExifToolService::write($originalPath, $image->iptc());
-
+            ExifToolService::write($originalPath, $image->iptc?->toArray() ?? []);
             $tempImagePath = $originalPath;
 
             if (strtolower($extension) !== $format) {
@@ -152,34 +152,20 @@ class FolderController extends Controller
                         continue 2;
                 }
 
-                if (!$img) {
-                    continue;
-                }
+                if (!$img) continue;
 
-                switch ($format) {
-                    case 'avif':
-                        imageavif($img, $tempImagePath);
-                        break;
-                    case 'jpeg':
-                    case 'jpg':
-                        imagejpeg($img, $tempImagePath);
-                        break;
-                    case 'png':
-                        imagepng($img, $tempImagePath);
-                        break;
-                    case 'webp':
-                        imagewebp($img, $tempImagePath);
-                        break;
-                    default:
-                        imagedestroy($img);
-                        continue 2;
-                }
+                match ($format) {
+                    'avif' => imageavif($img, $tempImagePath),
+                    'jpeg', 'jpg' => imagejpeg($img, $tempImagePath),
+                    'png' => imagepng($img, $tempImagePath),
+                    'webp' => imagewebp($img, $tempImagePath),
+                    default => imagedestroy($img)
+                };
 
                 imagedestroy($img);
             }
 
-            $filenameInZip = $image->name . '.' . $format;
-            $zip->addFile($tempImagePath, $filenameInZip);
+            $zip->addFile($tempImagePath, $image->name . '.' . $format);
         }
 
         $zip->close();
@@ -192,7 +178,13 @@ class FolderController extends Controller
      */
     public function destroy(Folder $folder)
     {
-        //
+        foreach ($folder->images as $image) {
+            $image->iptc()?->delete();
+        }
+
+        $folder->delete();
+
+        return redirect()->route('folders.index')->with('status.success', __('folder.destroy.success'));
     }
 
     public function select(Request $request, Folder $folder = null)

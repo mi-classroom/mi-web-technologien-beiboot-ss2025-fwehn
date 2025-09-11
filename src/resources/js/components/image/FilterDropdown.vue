@@ -80,7 +80,7 @@ onMounted(() => {
             <LucideFunnel />
         </button>
 
-        <div v-if="open" class="absolute right-0 mt-2 min-w-64 overflow-y-auto rounded-md bg-light p-4 shadow-lg z-50">
+        <div v-if="open" class="absolute right-0 z-50 mt-2 min-w-64 overflow-y-auto rounded-md bg-light p-4 shadow-lg">
             <table class="space-y-1 p-2 text-warm-dark">
                 <tbody>
                     <tr v-for="(value, option) in options" :key="option">

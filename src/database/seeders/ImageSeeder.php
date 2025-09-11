@@ -46,17 +46,18 @@ class ImageSeeder extends Seeder
 
             $iptc = ExifToolService::read(Storage::path($path));
 
-            Image::create(array_merge(
-                [
-                    'name' => $fileName,
-                    'width' => $width,
-                    'height' => $height,
-                    'original_path' => $path,
-                    'user_id' => $user->id,
-                    'folder_id' => null,
-                ],
-                $iptc
-            ));
+            $image = Image::create([
+                'name' => $fileName,
+                'width' => $width,
+                'height' => $height,
+                'original_path' => $path,
+                'user_id' => $user->id,
+                'folder_id' => null,
+            ]);
+
+            if (!empty($iptc)) {
+                $image->iptc()->create($iptc);
+            }
         }
     }
 }

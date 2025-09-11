@@ -32,6 +32,31 @@ class ExifToolService
         'ApplicationRecordVersion' => 'iptc_application_record_version',
     ];
 
+
+//      "ObjectAttributeReference": "000:Actuality",
+//      "ObjectName": "The Title (ref2024.1)",
+//      "SubjectReference": ["IPTC:10020231","IPTC:20020231","IPTC:30020231"],
+//      "Keywords": ["Keyword1ref2024.1","Keyword2ref2024.1","Keyword3ref2024.1"],
+//      "SpecialInstructions": "An Instruction (ref2024.1)",
+//      "DateCreated": "2024:03:22",
+//      "TimeCreated": "00:23:02+00:00",
+//      "By-line": "Creator1 (ref2024.1)",
+//      "By-lineTitle": "Creator's Job Title  (ref2024.1)",
+//      "City": "City (Core) (ref2024.1)",
+//      "Sub-location": "Sublocation (Core) (ref2024.1)",
+//      "Province-State": "Province/State(Core)(ref2024.1)",
+//      "Country-PrimaryLocationCode": "R23",
+//      "Country-PrimaryLocationName": "Country (Core) (ref2024.1)",
+//      "OriginalTransmissionReference": "Job Id (ref2024.1)",
+//      "Headline": "The Headline (ref2024.1)",
+//      "Credit": "Credit Line (ref2024.1)",
+//      "Source": "Source (ref2024.1)",
+//      "CopyrightNotice": "Copyright (Notice) 2024.1 IPTC - www.iptc.org  (ref2024.1)",
+//      "Caption-Abstract": "The description aka caption (ref2024.1)",
+//      "Writer-Editor": "Description Writer (ref2024.1)",
+//      "ApplicationRecordVersion": 4
+
+
     static public function read(string $filePath): array
     {
         $process = new Process([config('exiftool.path'), '-IPTC:All', '-json', $filePath]);
