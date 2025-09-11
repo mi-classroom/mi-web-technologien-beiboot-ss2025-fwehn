@@ -1,0 +1,20 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel-app
+        ports:
+            - "8000:8000"
+        environment:
+            APP_URL: http://localhost:8000
+            APP_ENV: local
+            APP_DEBUG: "true"
+            APP_KEY: base64:cpEq4i7mtdyLJm8/Uu4lXAHbv+XUOrSMwSJ2fwPQtQk=
+            DB_CONNECTION: sqlite
+            APP_LOCALE: de
+            APP_FALLBACK_LOCALE: de
+            APP_FAKER_LOCALE: de_DE
+            FILESYSTEM_DISK: public
+        stdin_open: true
+        tty: true
