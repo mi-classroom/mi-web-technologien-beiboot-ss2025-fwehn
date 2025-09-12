@@ -34,7 +34,15 @@ const form = useForm({
             <div class="flex max-h-full min-h-0 flex-grow">
                 <div class="max-w-1/2 flex h-full max-h-full w-1/2 flex-col justify-between p-4">
                     <img
-                        :src="image.preview_url"
+                        :src="route('images.preview', { image: image.id, w: 200 })"
+                        :srcset="`
+                            ${route('images.preview', { image: image.id, w: 200 })} 200w,
+                            ${route('images.preview', { image: image.id, w: 400 })} 400w,
+                            ${route('images.preview', { image: image.id, w: 800 })} 800w,
+                            ${route('images.preview', { image: image.id, w: 1200 })} 1200w
+                        `"
+                        fetchpriority="high"
+                        sizes="50vw"
                         :alt="image.name"
                         class="h-[calc(100%-4rem)] max-h-[calc(100%-4rem)] w-full max-w-full flex-grow self-center object-contain"
                     />

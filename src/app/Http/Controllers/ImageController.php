@@ -11,6 +11,7 @@ use App\Models\IptcDataEntry;
 use App\Facades\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -127,21 +128,28 @@ class ImageController extends Controller
 
     public function preview(Request $request, Image $image)
     {
-
         Gate::authorize('view', $image);
 
-//        $validated = $request->validate([
-//            "w" => "nullable|integer",
-//        ]);
+        $w = (int)$request->query('w');
+        $supportsAvif = str_contains($request->header('Accept', ''), 'image/avif');
 
-//        dump($validated["w"]);
+        $map = [
+            200 => 'sm_path',
+            400 => 'md_path',
+            800 => 'lg_path',
+            1200 => 'xl_path',
+        ];
 
+        $path = null;
 
-        if (empty($image->original_path)) {
-            abort(404, 'Bildpfad fehlt oder ist ungültig');
+        if ($supportsAvif && isset($map[$w])) {
+            $field = $map[$w];
+            $path = $image->$field ? Storage::disk('public')->path($image->$field) : null;
         }
 
-        $path = Storage::disk('public')->path($image->original_path);
+        if (!$path || !file_exists($path)) {
+            $path = Storage::disk('public')->path($image->original_path);
+        }
 
         if (!file_exists($path)) {
             abort(404, 'Bild nicht gefunden');

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\ProcessImagePreviews;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -14,10 +15,21 @@ class Image extends Model
         'height',
         'user_id',
         'original_path',
+        'sm_path',
+        'md_path',
+        'lg_path',
+        'xl_path',
         'folder_id',
     ];
 
     protected $appends = ['preview_url', 'fill_percent'];
+
+    protected static function booted()
+    {
+        static::created(function ($image) {
+            ProcessImagePreviews::dispatch($image);
+        });
+    }
 
     public function getPreviewUrlAttribute(): string
     {

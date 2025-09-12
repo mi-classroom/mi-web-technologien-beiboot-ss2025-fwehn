@@ -13,6 +13,10 @@ return new class extends Migration {
             $table->integer('width');
             $table->integer('height');
             $table->string('original_path');
+            $table->string('sm_path')->nullable();
+            $table->string('md_path')->nullable();
+            $table->string('lg_path')->nullable();
+            $table->string('xl_path')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('folder_id')->nullable()->constrained()->onDelete('cascade');
             $table->timestamps();

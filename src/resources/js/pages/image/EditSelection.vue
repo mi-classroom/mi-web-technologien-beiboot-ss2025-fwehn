@@ -86,7 +86,15 @@ function handleSubmit() {
                 <div class="max-w-1/2 flex h-full w-1/2 flex-col justify-between p-4">
                     <div class="relative h-[calc(100%-4rem)] w-full flex-grow self-center">
                         <img
-                            :src="currentImage.preview_url"
+                            :src="route('images.preview', { image: currentImage.id, w: 200 })"
+                            :srcset="`
+                                ${route('images.preview', { image: currentImage.id, w: 200 })} 200w,
+                                ${route('images.preview', { image: currentImage.id, w: 400 })} 400w,
+                                ${route('images.preview', { image: currentImage.id, w: 800 })} 800w,
+                                ${route('images.preview', { image: currentImage.id, w: 1200 })} 1200w
+                            `"
+                            sizes="50vw"
+                            fetchpriority="high"
                             :alt="currentImage.name"
                             class="h-full w-full object-contain"
                         />

@@ -204,18 +204,21 @@ const toggleSelection = (imageId: number, event?: MouseEvent) => {
 
                     <img
                         class="h-40 min-h-40 w-40 min-w-40 bg-warm-medium object-contain p-0"
-                        :src="route('images.preview', { image: image.id, w: 400 })"
+                        :src="route('images.preview', { image: image.id, w: 200 })"
                         :srcset="`
+                            ${route('images.preview', { image: image.id, w: 200 })} 200w,
                             ${route('images.preview', { image: image.id, w: 400 })} 400w,
                             ${route('images.preview', { image: image.id, w: 800 })} 800w,
                             ${route('images.preview', { image: image.id, w: 1200 })} 1200w
                         `"
-                        sizes="(max-width: 640px) 100vw, 400px"
+                        sizes="200px"
                         :alt="image.name"
+                        fetchpriority="high"
                         loading="lazy"
                     />
                     <div class="flex h-full w-full flex-col justify-center pl-4">
                         <h1 class="text-xl font-semibold">{{ image.name }}</h1>
+                        <!--TODO-->
                         <p>{{ image.iptc?.iptc_date_created ?? '-' }}</p>
                     </div>
                     <div class="flex items-center justify-center px-8">
