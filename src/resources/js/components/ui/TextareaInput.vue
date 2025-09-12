@@ -9,7 +9,6 @@ const props = defineProps<{
     label: string;
     error?: string;
     id: string;
-    password?: boolean;
     disabled?: boolean;
 }>();
 
@@ -25,11 +24,11 @@ const modelValue = useVModel(props, 'modelValue', emit, {
 
 <template>
     <BaseInput v-bind="props">
-        <input
+        <textarea
             :id="id"
-            :disabled="disabled"
-            :type="password ? 'password' : 'text'"
+            rows="3"
             placeholder=" "
+            :disabled="disabled"
             v-model="modelValue"
             :class="
                 cn(

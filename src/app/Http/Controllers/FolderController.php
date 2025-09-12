@@ -67,6 +67,7 @@ class FolderController extends Controller
     {
         $validated = $request->validated();
         $folder->update($validated);
+        $folder->iptc()->updateOrCreate([], $validated['iptc']);
 
         $operation = FolderOperation::tryFrom($validated["operation"]);
 

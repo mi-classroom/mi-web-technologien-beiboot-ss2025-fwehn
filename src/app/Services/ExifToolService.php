@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Carbon;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
@@ -73,7 +74,25 @@ class ExifToolService
         if (!empty($data[0])) {
             foreach (self::$iptcMap as $exifKey => $customKey) {
                 if (isset($data[0][$exifKey])) {
-                    $iptc[$customKey] = $data[0][$exifKey];
+                    switch ($customKey) {
+                        case "iptc_subject_reference":
+                        case "iptc_keywords":
+                            $iptc[$customKey] = gettype($data[0][$exifKey]) === "array"
+                                ? $data[0][$exifKey]
+                                : [$data[0][$exifKey]];
+                            break;
+                        case "iptc_date_created":
+                            $iptc[$customKey] = Carbon::createFromFormat('Y:m:d', $data[0][$exifKey]);
+                            break;
+                        case "iptc_time_created":
+                            $iptc[$customKey] = Carbon::parse($data[0][$exifKey]);
+                            break;
+                        case "iptc_application_record_version":
+                            $iptc[$customKey] = intval($data[0][$exifKey]);
+                            break;
+                        default:
+                            $iptc[$customKey] = $data[0][$exifKey];
+                    }
                 }
             }
         }
@@ -87,12 +106,23 @@ class ExifToolService
 
         foreach (self::$iptcMap as $exifKey => $customKey) {
             if (isset($iptcData[$customKey]) && $iptcData[$customKey] !== null) {
-                if (in_array($customKey, ["iptc_subject_reference", "iptc_keywords"])) {
-                    foreach ($iptcData[$customKey] as $iptcValue) {
-                        $command[] = "-IPTC:{$exifKey}={$iptcValue}";
-                    }
-                } else {
-                    $command[] = "-IPTC:{$exifKey}={$iptcData[$customKey]}";
+                switch ($customKey) {
+                    case "iptc_subject_reference":
+                    case "iptc_keywords":
+                        foreach ($iptcData[$customKey] as $iptcValue) {
+                            $command[] = "-IPTC:{$exifKey}={$iptcValue}";
+                        }
+                        break;
+                    case "iptc_date_created":
+                        $formatted = Carbon::parse($iptcData[$customKey])->format('Y:m:d');
+                        $command[] = "-IPTC:{$exifKey}={$formatted}";
+                        break;
+                    case "iptc_time_created":
+                        $formatted = Carbon::parse($iptcData[$customKey])->format('H:i:s+00:00');
+                        $command[] = "-IPTC:{$exifKey}={$formatted}";
+                        break;
+                    default:
+                        $command[] = "-IPTC:{$exifKey}={$iptcData[$customKey]}";
                 }
             }
         }

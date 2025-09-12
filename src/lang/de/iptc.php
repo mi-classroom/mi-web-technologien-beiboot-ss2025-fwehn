@@ -4,6 +4,7 @@ return [
     'iptc_object_attribute_reference' => 'Objektattribut-Referenz',
     'iptc_object_name' => 'Objektname',
     'iptc_subject_reference' => 'Themen-Referenz',
+    'iptc_keywords' => 'Stichwörter',
     'iptc_special_instructions' => 'Besondere Anweisungen',
     'iptc_date_created' => 'Erstellungsdatum',
     'iptc_time_created' => 'Erstellungszeit',

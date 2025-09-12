@@ -197,6 +197,8 @@ class ImageController extends Controller
 
         $image->update($validated);
 
+//        dd($validated["iptc"]);
+
         if (!empty($validated["iptc"])) {
             $image->iptc()->updateOrCreate([], $validated["iptc"]);
         }

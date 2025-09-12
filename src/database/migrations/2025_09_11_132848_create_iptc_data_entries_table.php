@@ -19,7 +19,7 @@ return new class extends Migration {
             $table->json('iptc_keywords')->nullable();
             $table->text('iptc_special_instructions')->nullable();
             $table->date('iptc_date_created')->nullable();
-            $table->string('iptc_time_created')->nullable();
+            $table->time('iptc_time_created')->nullable();
             $table->string('iptc_byline')->nullable();
             $table->string('iptc_byline_title')->nullable();
             $table->string('iptc_city')->nullable();

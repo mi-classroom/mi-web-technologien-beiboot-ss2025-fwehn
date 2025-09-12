@@ -4,22 +4,21 @@ import { cn } from '@/lib/utils';
 import { useVModel } from '@vueuse/core';
 
 const props = defineProps<{
-    modelValue: string | null;
-    defaultValue?: string;
+    modelValue: number | null;
+    defaultValue?: number;
     label: string;
     error?: string;
     id: string;
-    password?: boolean;
     disabled?: boolean;
 }>();
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: string): void;
+    (e: 'update:modelValue', value: number): void;
 }>();
 
 const modelValue = useVModel(props, 'modelValue', emit, {
     passive: true,
-    defaultValue: props.defaultValue ?? '',
+    defaultValue: props.defaultValue ?? undefined,
 });
 </script>
 
@@ -27,10 +26,11 @@ const modelValue = useVModel(props, 'modelValue', emit, {
     <BaseInput v-bind="props">
         <input
             :id="id"
-            :disabled="disabled"
-            :type="password ? 'password' : 'text'"
+            type="number"
+            step="1"
             placeholder=" "
-            v-model="modelValue"
+            :disabled="disabled"
+            v-model.number="modelValue"
             :class="
                 cn(
                     'block w-full appearance-none rounded border-s bg-transparent py-2.5 pl-2 text-lg font-semibold focus:outline-none focus:ring-0',

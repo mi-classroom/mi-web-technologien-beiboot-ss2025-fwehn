@@ -15,7 +15,11 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: props.folder.name!, href: route(
 
 const form = useForm({
     name: props.folder.name,
-    iptc: props.folder.iptc ?? {},
+    iptc: {
+        ...(props.folder.iptc ?? {}),
+        iptc_date_created: props.folder.iptc?.iptc_date_created ? new Date(props.folder.iptc.iptc_date_created) : null,
+        iptc_time_created: props.folder.iptc?.iptc_time_created ? new Date(props.folder.iptc.iptc_time_created) : null,
+    },
 });
 
 const editable = ref<Record<string, boolean>>({});

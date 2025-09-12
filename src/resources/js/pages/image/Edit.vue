@@ -16,7 +16,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 const form = useForm({
     name: props.image.name,
-    iptc: { ...props.image.iptc },
+    iptc: {
+        ...(props.image.iptc ?? {}),
+        iptc_subject_reference: props.image.iptc?.iptc_subject_reference ?? [],
+        iptc_keywords: props.image.iptc?.iptc_keywords ?? [],
+        iptc_date_created: props.image.iptc?.iptc_date_created ? new Date(props.image.iptc.iptc_date_created) : null,
+        iptc_time_created: props.image.iptc?.iptc_time_created ? new Date(props.image.iptc.iptc_time_created) : null,
+    },
 });
 </script>
 

@@ -32,13 +32,41 @@ props.images.forEach((image) => {
 });
 
 allIptcKeys.forEach((key) => {
-    const values = props.images.map((img) => img.iptc?.[key]).filter((v) => v !== undefined && v !== null && v !== '');
-    initialFormValues.iptc[key] = [...new Set(values)].join(', ');
+    const values = props.images
+        .map((img) => img.iptc?.[key])
+        .filter((v) => v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0));
 
     editableFields[key] = values.length > 0;
+
+    switch (key) {
+        case 'iptc_subject_reference':
+        case 'iptc_keywords':
+            initialFormValues.iptc[key] = [...new Set(values.flat() as string[])];
+            break;
+        case 'iptc_date_created':
+        case 'iptc_time_created':
+            initialFormValues.iptc[key] = values[0];
+            break;
+        case 'iptc_application_record_version':
+            initialFormValues.iptc[key] = parseInt((values as string[])[0]);
+            break;
+        default:
+            initialFormValues.iptc[key] = [...new Set(values)].join(', ');
+    }
 });
 
-const form = useForm<typeof initialFormValues>({ ...initialFormValues });
+const form = useForm({
+    ...initialFormValues,
+    iptc: {
+        ...initialFormValues.iptc,
+        iptc_date_created: initialFormValues.iptc.iptc_date_created
+            ? new Date(initialFormValues.iptc.iptc_date_created)
+            : null,
+        iptc_time_created: initialFormValues.iptc.iptc_time_created
+            ? new Date(initialFormValues.iptc.iptc_time_created)
+            : null,
+    },
+});
 const editable = ref<Record<string, boolean>>({ ...editableFields });
 
 const currentImageIndex = ref(0);
