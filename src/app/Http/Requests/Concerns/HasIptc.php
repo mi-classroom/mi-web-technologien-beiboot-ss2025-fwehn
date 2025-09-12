@@ -9,7 +9,10 @@ trait HasIptc
         return [
             'iptc.iptc_object_attribute_reference' => 'nullable|string',
             'iptc.iptc_object_name' => 'nullable|string',
-            'iptc.iptc_subject_reference' => 'nullable|string',
+            'iptc.iptc_subject_reference' => 'nullable|array',
+            'iptc.iptc_subject_reference.*' => 'required|string',
+            'iptc.iptc_keywords' => 'nullable|array',
+            'iptc.iptc_keywords.*' => 'required|string',
             'iptc.iptc_special_instructions' => 'nullable|string',
             'iptc.iptc_date_created' => 'nullable', // TODO Date
             'iptc.iptc_time_created' => 'nullable', // TODO Time

@@ -15,6 +15,8 @@ return new class extends Migration {
             // IPTC Felder
             $table->string('iptc_object_attribute_reference')->nullable();
             $table->string('iptc_object_name')->nullable();
+            $table->json('iptc_subject_reference')->nullable();
+            $table->json('iptc_keywords')->nullable();
             $table->text('iptc_special_instructions')->nullable();
             $table->date('iptc_date_created')->nullable();
             $table->string('iptc_time_created')->nullable();

@@ -12,6 +12,8 @@ class IptcDataEntry extends Model
     protected $fillable = [
         'iptc_object_attribute_reference',
         'iptc_object_name',
+        'iptc_subject_reference',
+        'iptc_keywords',
         'iptc_special_instructions',
         'iptc_date_created',
         'iptc_time_created',
@@ -30,6 +32,11 @@ class IptcDataEntry extends Model
         'iptc_caption_abstract',
         'iptc_writer_editor',
         'iptc_application_record_version',
+    ];
+
+    protected $casts = [
+        'iptc_subject_reference' => 'array',
+        'iptc_keywords' => 'array',
     ];
 
     public function iptcable(): MorphTo

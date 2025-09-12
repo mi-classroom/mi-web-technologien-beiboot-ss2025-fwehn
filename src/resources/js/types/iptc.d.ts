@@ -1,8 +1,8 @@
 interface Iptc {
     iptc_object_attribute_reference?: string;
     iptc_object_name?: string;
-    iptc_subject_reference?: string;
-    iptc_keywords?: string;
+    iptc_subject_reference?: string[];
+    iptc_keywords?: string[];
     iptc_special_instructions?: string;
     iptc_date_created?: string;
     iptc_time_created?: string;

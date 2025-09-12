@@ -10,8 +10,8 @@ class ExifToolService
     protected static array $iptcMap = [
         'ObjectAttributeReference' => 'iptc_object_attribute_reference',
         'ObjectName' => 'iptc_object_name',
-//        'SubjectReference' => 'iptc_subject_reference',
-//        'Keywords' => 'iptc_keywords',
+        'SubjectReference' => 'iptc_subject_reference',
+        'Keywords' => 'iptc_keywords',
         'SpecialInstructions' => 'iptc_special_instructions',
         'DateCreated' => 'iptc_date_created',
         'TimeCreated' => 'iptc_time_created',
@@ -87,7 +87,13 @@ class ExifToolService
 
         foreach (self::$iptcMap as $exifKey => $customKey) {
             if (isset($iptcData[$customKey]) && $iptcData[$customKey] !== null) {
-                $command[] = "-IPTC:{$exifKey}={$iptcData[$customKey]}";
+                if (in_array($customKey, ["iptc_subject_reference", "iptc_keywords"])) {
+                    foreach ($iptcData[$customKey] as $iptcValue) {
+                        $command[] = "-IPTC:{$exifKey}={$iptcValue}";
+                    }
+                } else {
+                    $command[] = "-IPTC:{$exifKey}={$iptcData[$customKey]}";
+                }
             }
         }
 
