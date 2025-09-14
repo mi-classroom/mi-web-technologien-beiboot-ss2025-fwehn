@@ -3,7 +3,7 @@ interface Props {
     open: boolean;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
     (e: 'cancel'): void;

@@ -1,6 +1,13 @@
 <?php
 
 return [
+    "name" => 'Name',
+    "name_prefix" => 'Namenspräfix',
+    "name_iterators" => [
+        '' => '---',
+        '#_?' => '#_<Präfix>',
+        '?_#' => '<Präfix>_#'
+    ],
     "store" => [
         "success" => ":imageName wurde erfolgreich hochgeladen!",
     ],

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import IptcInputs from '@/components/iptc/IptcInputs.vue';
+import PresetButton from '@/components/preset/PresetButton.vue';
 import DownloadButton from '@/components/ui/DownloadButton.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
@@ -19,6 +20,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const initialFormValues = {
     name_prefix: '',
+    name_iterator: '',
     iptc: {} as Iptc,
 };
 
@@ -33,7 +35,7 @@ props.images.forEach((image) => {
 
 allIptcKeys.forEach((key) => {
     const values = props.images
-        .map((img) => img.iptc?.[key])
+        .map((img) => img.iptc?.[key as keyof Iptc])
         .filter((v) => v !== undefined && v !== null && v !== '' && !(Array.isArray(v) && v.length === 0));
 
     editableFields[key] = values.length > 0;
@@ -45,12 +47,28 @@ allIptcKeys.forEach((key) => {
             break;
         case 'iptc_date_created':
         case 'iptc_time_created':
-            initialFormValues.iptc[key] = values[0];
+            initialFormValues.iptc[key] = values[0] as string;
             break;
         case 'iptc_application_record_version':
             initialFormValues.iptc[key] = parseInt((values as string[])[0]);
             break;
-        default:
+        case 'iptc_object_attribute_reference':
+        case 'iptc_object_name':
+        case 'iptc_special_instructions':
+        case 'iptc_byline':
+        case 'iptc_byline_title':
+        case 'iptc_city':
+        case 'iptc_sub_location':
+        case 'iptc_province_state':
+        case 'iptc_country_primary_location_code':
+        case 'iptc_country_primary_location_name':
+        case 'iptc_original_transmission_reference':
+        case 'iptc_headline':
+        case 'iptc_credit':
+        case 'iptc_source':
+        case 'iptc_copyright_notice':
+        case 'iptc_caption_abstract':
+        case 'iptc_writer_editor':
             initialFormValues.iptc[key] = [...new Set(values)].join(', ');
     }
 });
@@ -81,13 +99,13 @@ const prevImage = () => {
 
 function handleSubmit() {
     form.transform((data) => {
-        const filtered: Record<string, string> = {};
+        const filtered: Record<string, string | number | Date | string[] | null | undefined> = {};
         for (const key in data.iptc) {
             if (editable.value[key]) {
-                filtered[key] = data.iptc[key];
+                filtered[key] = data.iptc[key as keyof IptcForm];
             }
         }
-        return { name_prefix: data.name_prefix, iptc: filtered };
+        return { name_prefix: data.name_prefix, name_iterator: data.name_iterator, iptc: filtered };
     });
 
     form.put(route('images.update-selection', { images: imageIds }), {
@@ -99,15 +117,25 @@ function handleSubmit() {
 <template>
     <Head title="Images" />
     <MainLayout :breadcrumbs="breadcrumbs">
-        <form @submit.prevent="handleSubmit" class="flex h-full flex-col gap-2">
+        <form @submit.prevent="handleSubmit" class="flex h-full flex-col items-stretch justify-center gap-2">
             <div class="flex flex-row gap-2 px-8 pl-4 pt-4">
                 <TextInput
                     id="name_prefix"
                     v-model="form.name_prefix"
-                    label="Namenspräfix"
+                    :label="$t('image.name_prefix')"
+                    :disabled="form.name_iterator === ''"
                     :error="form.errors.name_prefix"
                     class="flex-grow"
                 />
+
+                <select
+                    v-model="form.name_iterator"
+                    class="mt-2 flex cursor-pointer flex-row items-center gap-0.5 rounded bg-primary px-2 py-1 text-center text-lg font-semibold text-white"
+                >
+                    <option value="">{{ $t('image.name_iterators.') }}</option>
+                    <option value="#_?">{{ $t('image.name_iterators.#_?') }}</option>
+                    <option value="?_#">{{ $t('image.name_iterators.?_#') }}</option>
+                </select>
             </div>
 
             <div class="flex max-h-full min-h-0 flex-grow">
@@ -159,6 +187,7 @@ function handleSubmit() {
                             Delete
                         </button>
                         <DownloadButton :href="route('images.export-selection', { images: imageIds })" />
+                        <PresetButton v-model="form.iptc" />
                     </div>
                 </div>
 

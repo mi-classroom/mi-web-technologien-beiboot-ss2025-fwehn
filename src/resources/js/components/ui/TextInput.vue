@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useVModel } from '@vueuse/core';
 
 const props = defineProps<{
-    modelValue: string | null;
+    modelValue?: string | null;
     defaultValue?: string;
     label: string;
     error?: string;
@@ -24,7 +24,7 @@ const modelValue = useVModel(props, 'modelValue', emit, {
 </script>
 
 <template>
-    <BaseInput v-bind="props">
+    <BaseInput :id="id" :label="label" v-model="modelValue" :disabled="disabled">
         <input
             :id="id"
             :disabled="disabled"

@@ -11,7 +11,6 @@ use App\Models\IptcDataEntry;
 use App\Facades\ExifToolService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -39,13 +38,31 @@ class ImageController extends Controller
 
         foreach ($request->all() as $field => $value) {
             if (in_array($field, $filterableFields, true)) {
-                $query->whereHas('iptc', function ($q) use ($field, $value) {
-                    if ($value === 'true' || $value === true) {
-                        $q->whereNotNull($field);
-                    } elseif ($value === 'false' || $value === false) {
-                        $q->whereNull($field);
-                    }
-                });
+                $isArrayField = ((new IptcDataEntry())->getCasts()[$field] ?? null) === 'array';
+
+                if ($value === 'true' || $value === true) {
+                    $query->whereHas('iptc', function ($q) use ($field, $isArrayField) {
+                        $q->where(function ($sub) use ($field, $isArrayField) {
+                            if ($isArrayField) {
+                                $sub->whereNotNull($field)->where($field, '!=', '[]');
+                            } else {
+                                $sub->whereNotNull($field)->where($field, '!=', '');
+                            }
+                        });
+                    });
+                } elseif ($value === 'false' || $value === false) {
+                    $query->where(function ($outer) use ($field, $isArrayField) {
+                        $outer->whereHas('iptc', function ($q) use ($field, $isArrayField) {
+                            $q->where(function ($sub) use ($field, $isArrayField) {
+                                if ($isArrayField) {
+                                    $sub->whereNull($field)->orWhere($field, '=', '[]');
+                                } else {
+                                    $sub->whereNull($field)->orWhere($field, '=', '');
+                                }
+                            });
+                        })->orDoesntHave('iptc');
+                    });
+                }
             }
         }
 
@@ -197,8 +214,6 @@ class ImageController extends Controller
 
         $image->update($validated);
 
-//        dd($validated["iptc"]);
-
         if (!empty($validated["iptc"])) {
             $image->iptc()->updateOrCreate([], $validated["iptc"]);
         }
@@ -208,13 +223,27 @@ class ImageController extends Controller
 
     public function updateSelection(ImageSelectionRequest $request)
     {
-//        TODO fortlaufende bildbenennung
-
         $validated = $request->validated();
 
         $images = Image::with('iptc')->whereIn('id', $validated['images'])->get();
 
-        foreach ($images as $image) {
+        foreach ($images as $index => $image) {
+            if (array_key_exists('name_prefix', $validated) &&
+                array_key_exists('name_iterator', $validated) &&
+                Str::length($validated['name_iterator']) > 0
+            ) {
+                $image->update(['name' =>
+                    Str::replace(
+                        "?",
+                        Str::trim($validated['name_prefix']),
+                        Str::replace(
+                            "#",
+                            Str::padLeft($index, strlen($images->count()), "0"), $validated['name_iterator']
+                        )
+                    )
+                ]);
+            }
+
             if (!empty($validated['iptc'])) {
                 $image->iptc()->updateOrCreate([], $validated['iptc']);
             }

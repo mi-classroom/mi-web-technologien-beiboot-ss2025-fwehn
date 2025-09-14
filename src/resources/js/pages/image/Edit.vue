@@ -1,16 +1,20 @@
 <script setup lang="ts">
 import IptcInputs from '@/components/iptc/IptcInputs.vue';
+import PresetButton from '@/components/preset/PresetButton.vue';
 import DownloadButton from '@/components/ui/DownloadButton.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
+import { Image } from '@/types/image';
 import { Head, useForm } from '@inertiajs/vue3';
 
-const props = defineProps(['image']);
+const props = defineProps<{
+    image: Image;
+}>();
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Images', href: '/images' },
     {
-        title: props.image.name,
+        title: props.image.name ?? 'Image',
         href: `/images/${props.image.id}`,
     },
 ];
@@ -61,7 +65,8 @@ const form = useForm({
                         >
                             Delete
                         </button>
-                        <DownloadButton :href="route('images.export', image)" />
+                        <DownloadButton :href="route('images.export', image.id)" />
+                        <PresetButton v-model="form.iptc" />
                     </div>
                 </div>
 

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useVModel } from '@vueuse/core';
 
 const props = defineProps<{
-    modelValue: number | null;
+    modelValue?: number | null;
     defaultValue?: number;
     label: string;
     error?: string;

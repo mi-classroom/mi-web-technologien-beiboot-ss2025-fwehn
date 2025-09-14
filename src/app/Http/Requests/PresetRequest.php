@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\FolderOperation;
 use App\Http\Requests\Concerns\HasIptc;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class ImageSelectionRequest extends FormRequest
+class PresetRequest extends FormRequest
 {
     use HasIptc;
 
@@ -17,11 +19,7 @@ class ImageSelectionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'images' => 'required|array',
-            'images.*' => 'integer|exists:images,id',
-
-            'name_prefix' => 'nullable|string',
-            'name_iterator' => 'nullable|string|in:,#_?,?_#',
+            "name" => "required|string",
 
             ...$this::iptcRules()
         ];

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import IptcInputs from '@/components/iptc/IptcInputs.vue';
+import PresetButton from '@/components/preset/PresetButton.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import DownloadButton from '@/components/ui/DownloadButton.vue';
 import TextInput from '@/components/ui/TextInput.vue';
@@ -90,6 +91,7 @@ function confirmSubmit(operation: FolderOperation) {
                             Delete
                         </button>
                         <DownloadButton :href="route('folders.export', props.folder.id)" />
+                        <PresetButton v-model="form.iptc" />
                     </div>
                 </div>
 

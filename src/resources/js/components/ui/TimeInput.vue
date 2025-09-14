@@ -5,7 +5,7 @@ import { useVModel } from '@vueuse/core';
 import { computed } from 'vue';
 
 const props = defineProps<{
-    modelValue: Date | null;
+    modelValue?: Date | null;
     label: string;
     error?: string;
     id: string;

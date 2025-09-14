@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\ImageController;
+use App\Http\Controllers\PresetController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -31,6 +32,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::apiResource('images', ImageController::class)
         ->only(['index', 'store', 'show', 'edit', 'update', 'destroy'])
         ->names('images');
+});
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('presets/list', [PresetController::class, 'list'])->name('presets.list');
+
+    Route::apiResource('presets', PresetController::class)
+        ->only(['store', 'destroy'])
+        ->names('presets');
 });
 
 require __DIR__ . '/settings.php';

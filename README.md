@@ -27,9 +27,19 @@ Halten Sie die Anwendung, gerade in der Anfangsphase möglichst einfach, schlank
 | [Kernfunktion im Backend erstellen](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/1)                                                      | ~12.30h     |
 | [Upload via Web Frontend](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/2)                                                                | ~6h         |
 | [Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/3)                    | ~4h         |
-| [Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4) |             |
-| [Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)                                                                        |             |
+| [Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4) | ~80h        |
+| [Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)                                                                        | ~7h         |
 | [Finetuning & Doku](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/6)                                                                      | ~2.30h      |
+| **Gesamt**                                                                                                                                                   | **~110h**   |
+
+Hinweis:
+Die Angabe
+zu "[Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4)"
+ist eine recht grobe Schätzung, da dieses Issue in vielen kleineren Sessions implementiert wurde und diese leider nicht
+alle erfasst wurden. Außerdem sind einige Stunden der
+Issues "[Upload via Web Frontend](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/2)"
+und "[Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)" dem jeweils vorangestellten
+Issue zugeordnet, da Teile dieser Issues bereits zu einem früheren Zeitpunkt implementiert wurden.
 
 # Installation
 
@@ -38,7 +48,7 @@ ist die einfachste Möglichkeit um eine Demo laufen zu lassen [Docker](https://w
 Dazu liegt im [``src``](./src) Verzeichnis sowohl ein [Dockerfile](./src/Dockerfile) als auch eine
 [ ``docker-compose.yml``](./src/docker-compose.yml).
 
-Um den Container korrekt zu starten, muss eine SQLite Datenbank erstellt werden:
+Um den Container korrekt zu starten, muss zunächst eine SQLite Datenbank erstellt werden:
 
 ```shell
 cd src

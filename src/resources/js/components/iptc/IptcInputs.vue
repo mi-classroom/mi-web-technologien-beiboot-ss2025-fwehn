@@ -8,7 +8,7 @@ import TimeInput from '@/components/ui/TimeInput.vue';
 import { reactive, watch } from 'vue';
 
 const props = defineProps<{
-    modelValue: Iptc;
+    modelValue: IptcForm;
     editableFields?: Record<string, boolean>;
     errors?: Record<string, string>;
     selectable?: boolean;
@@ -16,7 +16,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    (e: 'update:modelValue', value: Iptc): void;
+    (e: 'update:modelValue', value: IptcForm): void;
     (e: 'update:editableFields', value: Record<string, boolean>): void;
 }>();
 
@@ -45,11 +45,18 @@ const iptcFields = {
     iptc_application_record_version: 'integer',
 };
 
-const localModel = reactive({ ...props.modelValue });
+const localModel = reactive(props.modelValue);
 const localEditable = reactive({ ...(props.editableFields || {}) });
 
 watch(localModel, (val) => emit('update:modelValue', val), { deep: true });
 watch(localEditable, (val) => emit('update:editableFields', val), { deep: true });
+watch(
+    () => props.modelValue,
+    (val) => {
+        Object.assign(localModel, val);
+    },
+    { deep: true },
+);
 </script>
 
 <template>
@@ -69,7 +76,7 @@ watch(localEditable, (val) => emit('update:editableFields', val), { deep: true }
                     :id="key"
                     :label="$t(`iptc.` + key)"
                     :error="props.errors?.[`iptc.` + key]"
-                    v-model="localModel[key] as number | null"
+                    v-model="localModel[key] as number | null | undefined"
                     :disabled="props.selectable && !localEditable[key]"
                     class="flex-grow"
                 />
@@ -79,7 +86,7 @@ watch(localEditable, (val) => emit('update:editableFields', val), { deep: true }
                     :id="key"
                     :label="$t(`iptc.` + key)"
                     :error="props.errors?.[`iptc.` + key]"
-                    v-model="localModel[key] as unknown as Date | null"
+                    v-model="localModel[key] as unknown as Date | null | undefined"
                     :disabled="props.selectable && !localEditable[key]"
                     class="flex-grow"
                 />
@@ -89,7 +96,7 @@ watch(localEditable, (val) => emit('update:editableFields', val), { deep: true }
                     :id="key"
                     :label="$t(`iptc.` + key)"
                     :error="props.errors?.[`iptc.` + key]"
-                    v-model="localModel[key] as unknown as Date | null"
+                    v-model="localModel[key] as unknown as Date | null | undefined"
                     :disabled="props.selectable && !localEditable[key]"
                     class="flex-grow"
                 />
@@ -99,7 +106,7 @@ watch(localEditable, (val) => emit('update:editableFields', val), { deep: true }
                     :id="key"
                     :label="$t(`iptc.` + key)"
                     :error="props.errors?.[`iptc.` + key]"
-                    v-model="localModel[key] as string[]"
+                    v-model="localModel[key] as string[] | undefined"
                     :disabled="props.selectable && !localEditable[key]"
                     class="flex-grow"
                 />
@@ -109,14 +116,14 @@ watch(localEditable, (val) => emit('update:editableFields', val), { deep: true }
                     :id="key"
                     :label="$t(`iptc.` + key)"
                     :error="props.errors?.[`iptc.` + key]"
-                    v-model="localModel[key] as string | null"
+                    v-model="localModel[key] as string | null | undefined"
                     :disabled="props.selectable && !localEditable[key]"
                     class="flex-grow"
                 />
 
                 <TextInput
                     v-else
-                    v-model="localModel[key] as string | null"
+                    v-model="localModel[key] as string | null | undefined"
                     :id="key"
                     :label="$t(`iptc.` + key)"
                     :error="props.errors?.[`iptc.` + key]"
