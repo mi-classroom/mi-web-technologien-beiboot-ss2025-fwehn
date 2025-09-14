@@ -57,7 +57,11 @@ watch(localEditable, (val) => emit('update:editableFields', val), { deep: true }
         <div v-for="(type, key) in iptcFields" :key="key" class="grid gap-3">
             <div class="flex flex-row items-center gap-2">
                 <template v-if="props.selectable">
-                    <input type="checkbox" v-model="localEditable[key]" class="accent-primary" />
+                    <input
+                        type="checkbox"
+                        v-model="localEditable[key]"
+                        class="h-6 w-6 cursor-pointer rounded-md border-warm-medium accent-primary transition-all duration-200 checked:bg-primary checked:text-white"
+                    />
                 </template>
 
                 <IntegerInput

@@ -24,23 +24,21 @@ const modelValue = useVModel(props, 'modelValue', emits, {
 </script>
 
 <template>
-    <div :class="props.class">
-        <div class="relative mt-2">
-            <slot :model-value="modelValue" :id="id" :disabled="disabled" />
-            <label
-                :for="id"
-                :class="
-                    cn(
-                        'absolute top-3 z-10 ml-1 origin-[0] -translate-y-7 scale-75 transform select-none bg-warm-light px-1 text-lg duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-7 peer-focus:scale-75',
-                        !!error ? 'text-secondary' : 'text-warm-dark peer-focus:text-primary',
-                    )
-                "
-            >
-                {{ label }}
-            </label>
-        </div>
-        <p v-if="!!error" class="my-1 text-xs text-secondary">
-            {{ error }}
-        </p>
+    <div :class="cn(props.class, 'relative mt-2')">
+        <slot :model-value="modelValue" :id="id" :disabled="disabled" />
+        <label
+            :for="id"
+            :class="
+                cn(
+                    'absolute top-3 z-10 ml-1 origin-[0] -translate-y-7 scale-75 transform cursor-text select-none bg-warm-light px-1 text-lg duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:-translate-y-7 peer-focus:scale-75',
+                    !!error ? 'text-secondary' : 'text-warm-dark peer-focus:text-primary',
+                )
+            "
+        >
+            {{ label }}
+        </label>
     </div>
+    <p v-if="!!error" class="my-1 text-xs text-secondary">
+        {{ error }}
+    </p>
 </template>
