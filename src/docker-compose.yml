@@ -16,5 +16,11 @@ services:
             APP_FALLBACK_LOCALE: de
             APP_FAKER_LOCALE: de_DE
             FILESYSTEM_DISK: public
+        volumes:
+            - "./database/database.sqlite:/app/database/database.sqlite"
+#        command: >
+#            sh -c "php artisan serve --host=0.0.0.0 --port=8000 & php artisan queue:listen --tries=1"
+#        command: >
+#          sh -c "php artisan migrate:fresh --seed && php artisan serve --host=0.0.0.0 --port=8000 & php artisan queue:listen --tries=1"
         stdin_open: true
         tty: true

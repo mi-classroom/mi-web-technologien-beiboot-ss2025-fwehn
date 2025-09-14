@@ -22,6 +22,31 @@ Halten Sie die Anwendung, gerade in der Anfangsphase möglichst einfach, schlank
 
 ## Arbeitszeit pro Issue
 
-| Issue                                                                                                            | Arbeitszeit |
-|------------------------------------------------------------------------------------------------------------------|-------------|
-| [Issue 1: Kernfunktion im Backend erstellen](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/1) | ~12.30h     |
+| Issue                                                                                                                                                        | Arbeitszeit |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
+| [Kernfunktion im Backend erstellen](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/1)                                                      | ~12.30h     |
+| [Upload via Web Frontend](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/2)                                                                | ~6h         |
+| [Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/3)                    | ~4h         |
+| [Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4) |             |
+| [Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)                                                                        |             |
+| [Finetuning & Doku](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/6)                                                                      | ~2.30h      |
+
+# Installation
+
+Da für die Anwendung einige externe Tools und Bibliotheken installiert und PHP-Konfigurationen gesetzt werden müssten,
+ist die einfachste Möglichkeit um eine Demo laufen zu lassen [Docker](https://www.docker.com/).
+Dazu liegt im [``src``](./src) Verzeichnis sowohl ein [Dockerfile](./src/Dockerfile) als auch eine
+[ ``docker-compose.yml``](./src/docker-compose.yml).
+
+Um den Container korrekt zu starten, muss eine SQLite Datenbank erstellt werden:
+
+```shell
+cd src
+touch database/database.sqlite
+```
+
+Danach kann der Container gestartet werden:
+
+```shell
+docker compose up -d --build
+```
