@@ -5,6 +5,7 @@ import IntegerInput from '@/components/ui/IntegerInput.vue';
 import TextareaInput from '@/components/ui/TextareaInput.vue';
 import TextInput from '@/components/ui/TextInput.vue';
 import TimeInput from '@/components/ui/TimeInput.vue';
+import iptcCustomTypes from '@/types/iptc-custom-types';
 import { reactive, watch } from 'vue';
 
 const props = defineProps<{
@@ -19,31 +20,6 @@ const emit = defineEmits<{
     (e: 'update:modelValue', value: IptcForm): void;
     (e: 'update:editableFields', value: Record<string, boolean>): void;
 }>();
-
-const iptcFields = {
-    iptc_object_attribute_reference: 'text',
-    iptc_object_name: 'text',
-    iptc_subject_reference: 'chips',
-    iptc_keywords: 'chips',
-    iptc_special_instructions: 'textarea',
-    iptc_date_created: 'date',
-    iptc_time_created: 'time',
-    iptc_byline: 'text',
-    iptc_byline_title: 'text',
-    iptc_city: 'text',
-    iptc_sub_location: 'text',
-    iptc_province_state: 'text',
-    iptc_country_primary_location_code: 'text',
-    iptc_country_primary_location_name: 'text',
-    iptc_original_transmission_reference: 'text',
-    iptc_headline: 'text',
-    iptc_credit: 'text',
-    iptc_source: 'text',
-    iptc_copyright_notice: 'text',
-    iptc_caption_abstract: 'textarea',
-    iptc_writer_editor: 'text',
-    iptc_application_record_version: 'integer',
-};
 
 const localModel = reactive(props.modelValue);
 const localEditable = reactive({ ...(props.editableFields || {}) });
@@ -61,7 +37,7 @@ watch(
 
 <template>
     <div :class="props.class">
-        <div v-for="(type, key) in iptcFields" :key="key" class="grid gap-3">
+        <div v-for="(type, key) in iptcCustomTypes" :key="key" class="grid gap-3">
             <div class="flex flex-row items-center gap-2">
                 <template v-if="props.selectable">
                     <input

@@ -82,13 +82,13 @@ function confirmSubmit(operation: FolderOperation) {
 
                     <div class="flex h-16 flex-row items-center justify-center gap-2">
                         <button @click.prevent="open" class="button-primary h-10 rounded-md px-4 align-middle">
-                            Submit
+                            {{ $t('folder.update._') }}
                         </button>
                         <button
                             @click.prevent="form.delete(route('folders.destroy', props.folder.id))"
                             class="button-secondary h-10 rounded-md px-4 align-middle"
                         >
-                            Delete
+                            {{ $t('folder.destroy._') }}
                         </button>
                         <DownloadButton :href="route('folders.export', props.folder.id)" />
                         <PresetButton v-model="form.iptc" />
@@ -106,28 +106,28 @@ function confirmSubmit(operation: FolderOperation) {
         </form>
 
         <BaseModal :open="showModal" @cancel="close">
-            <h2 class="mb-4 text-lg font-bold">Auf welche Elemente sollen die Einstellungen angewandt werden?</h2>
+            <h2 class="mb-4 text-lg font-bold">{{ $t('folder.update.modal.title') }}</h2>
             <div class="flex flex-col gap-3">
                 <button
                     @click="confirmSubmit(FolderOperation.SAVE)"
                     class="button-primary h-10 rounded-md px-4 align-middle"
                 >
-                    Lediglich diesen Ordner aktualisieren
+                    {{ $t('folder.update.modal.actions.save') }}
                 </button>
                 <button
                     @click="confirmSubmit(FolderOperation.PROPAGATE)"
                     class="button-primary h-10 rounded-md px-4 align-middle"
                 >
-                    Ordner und alle Bilder aktualisieren
+                    {{ $t('folder.update.modal.actions.propagate') }}
                 </button>
                 <button
                     @click="confirmSubmit(FolderOperation.MERGE)"
                     class="button-primary h-10 rounded-md px-4 align-middle"
                 >
-                    Ordner und Bilder mit fehlenden Werten aktualisieren
+                    {{ $t('folder.update.modal.actions.merge') }}
                 </button>
                 <button @click="close" class="button-secondary h-10 w-full rounded-md px-4 align-middle">
-                    Abbrechen
+                    {{ $t('folder.update.modal.actions.close') }}
                 </button>
             </div>
         </BaseModal>

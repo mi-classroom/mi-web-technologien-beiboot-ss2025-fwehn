@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import FolderTree from '@/components/FolderTree.vue';
+import ImageFilterDropdown from '@/components/FilterDropdown.vue';
+import FolderTree from '@/components/folder/FolderTree.vue';
 import SnackbarService from '@/components/SnackbarService.vue';
-import ImageFilterDropdown from '@/components/image/FilterDropdown.vue';
 import SnackbarProvider from '@/providers/SnackbarProvider.vue';
 import type { BreadcrumbItemType } from '@/types';
 import { Link } from '@inertiajs/vue3';

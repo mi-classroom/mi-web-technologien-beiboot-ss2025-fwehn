@@ -58,7 +58,7 @@ function confirmCreateFolder() {
                 >
                     <CirclePlus class="flex-shrink-0" />
                     <span class="flex-grow overflow-hidden text-ellipsis text-nowrap text-start">
-                        Ordner erstellen
+                        {{ $t('folder.store._') }}
                     </span>
                 </button>
             </li>
@@ -66,13 +66,17 @@ function confirmCreateFolder() {
     </div>
 
     <BaseModal :open="showModal" @cancel="closeModal">
-        <h2 class="mb-4 text-lg font-bold">Neuen Ordner erstellen?</h2>
+        <h2 class="mb-4 text-lg font-bold">{{ $t('folder.store.modal.title') }}</h2>
         <form @submit.prevent="confirmCreateFolder" @reset="closeModal" class="flex flex-col gap-3">
             <TextInput id="name" v-model="form.name" label="Name" :error="form.errors.name" class="flex-grow" />
 
             <div class="flex w-full items-end justify-center gap-3">
-                <button type="reset" class="button-secondary h-10 rounded-md px-4">Abbrechen</button>
-                <button type="submit" class="button-primary h-10 rounded-md px-4">Speichern</button>
+                <button type="reset" class="button-secondary h-10 rounded-md px-4">
+                    {{ $t('folder.store.modal.actions.reset') }}
+                </button>
+                <button type="submit" class="button-primary h-10 rounded-md px-4">
+                    {{ $t('folder.store.modal.actions.submit') }}
+                </button>
             </div>
         </form>
     </BaseModal>

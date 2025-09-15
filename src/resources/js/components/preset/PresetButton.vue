@@ -134,13 +134,13 @@ onMounted(() => {
             <h1 class="mb-4 text-lg font-bold">{{ $t('preset._') }} {{ $t('preset.select._') }}</h1>
             <div class="flex flex-col items-stretch justify-center gap-4">
                 <div class="max-h-96 overflow-y-auto">
-                    <div v-if="loading" class="p-4 text-center">Loading...</div>
+                    <div v-if="loading" class="p-4 text-center">{{ $t('preset.modal.loading') }}</div>
 
                     <table v-else class="w-full table-auto border-collapse">
                         <thead>
                             <tr class="bg-gray-100">
-                                <th class="border px-2 py-1 text-left">Name</th>
-                                <th class="border px-2 py-1">Action</th>
+                                <th class="border px-2 py-1 text-left">{{ $t('preset.modal.name') }}</th>
+                                <th class="border px-2 py-1">{{ $t('preset.modal.action') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -203,7 +203,7 @@ onMounted(() => {
                 </div>
 
                 <button @click="close" class="button-secondary h-10 w-full rounded-md px-4 align-middle">
-                    Schließen
+                    {{ $t('preset.modal.actions.close') }}
                 </button>
             </div>
         </BaseModal>
@@ -235,14 +235,16 @@ onMounted(() => {
                     {{ $t('preset._') }} {{ $t('preset.store._') }}
                 </button>
                 <button @click="close" class="button-secondary h-10 w-full rounded-md px-4 align-middle">
-                    Schließen
+                    {{ $t('preset.modal.actions.close') }}
                 </button>
             </div>
         </BaseModal>
 
         <BaseModal v-if="action === 'import'" :open="showModal" @close="close">
             <h1 class="mb-4 text-lg font-bold">{{ $t('preset._') }} {{ $t('preset.import._') }}</h1>
-            <button @click="close" class="button-secondary h-10 w-full rounded-md px-4 align-middle">Schließen</button>
+            <button @click="close" class="button-secondary h-10 w-full rounded-md px-4 align-middle">
+                {{ $t('preset.modal.actions.close') }}
+            </button>
         </BaseModal>
 
         <input type="file" ref="fileInput" accept="application/json" class="hidden" @change="importPreset" />

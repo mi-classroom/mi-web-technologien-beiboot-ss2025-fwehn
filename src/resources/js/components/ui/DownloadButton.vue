@@ -23,7 +23,7 @@ const fullHref = computed(() => {
             :href="fullHref"
             class="flex h-full items-center bg-lightest px-4 text-sm font-medium text-warm-dark hover:bg-light hover:text-primary focus:ring-2 focus:ring-primary"
         >
-            Download
+            {{ $t('component.download_button.download') }}
         </a>
         <select
             v-model="format"

@@ -20,5 +20,13 @@ return [
     'destroy' => [
         '_' => 'löschen',
         'success' => 'Preset wurde erfolgreich gelöscht'
+    ],
+    'modal' => [
+        'loading' => 'Lade...',
+        'name' => 'Name',
+        'action' => 'Aktion',
+        'actions' => [
+            'close' => 'Schließen'
+        ]
     ]
 ];

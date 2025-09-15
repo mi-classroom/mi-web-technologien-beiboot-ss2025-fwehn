@@ -67,24 +67,24 @@ class FolderController extends Controller
     {
         $validated = $request->validated();
         $folder->update($validated);
-        $folder->iptc()->updateOrCreate([], $validated['iptc']);
+        $folderIptc = $folder->iptc()->updateOrCreate([], !empty($validated['iptc']) ? $validated['iptc'] : []);
 
         $operation = FolderOperation::tryFrom($validated["operation"]);
 
         switch ($operation) {
             case FolderOperation::PROPAGATE:
                 foreach ($folder->images as $image) {
-                    if (!empty($validated['iptc'])) {
-                        $image->iptc()->updateOrCreate([], $validated['iptc']);
-                    }
+                    $image->iptc()->updateOrCreate([], $folderIptc->toArray());
                 }
                 break;
 
             case FolderOperation::MERGE:
                 foreach ($folder->images as $image) {
-                    $updateData = $validated['iptc']
-                        ->filter(fn($value, $key) => $image->iptc?->$key === null)
-                        ->toArray();
+                    $updateData = array_filter(
+                        $folderIptc->only((new IptcDataEntry())->getFillable()) ?? [],
+                        fn($key) => !$image->iptc?->$key,
+                        ARRAY_FILTER_USE_KEY
+                    );
 
                     if (!empty($updateData)) {
                         $image->iptc()->updateOrCreate([], $updateData);

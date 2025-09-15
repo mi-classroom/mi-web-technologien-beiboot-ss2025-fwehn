@@ -89,7 +89,7 @@ const removeChip = (i: number) => {
             v-if="(chips ?? []).length > 0 && inputText.length === 0"
             class="pointer-events-none absolute bottom-2 left-2 text-lg text-warm-medium"
         >
-            Add...
+            {{ $t('component.chips_input.add') }}
         </span>
     </BaseInput>
 </template>

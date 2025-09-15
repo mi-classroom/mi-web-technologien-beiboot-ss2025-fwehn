@@ -69,7 +69,7 @@ defineProps<{
                 >
                     <CirclePlus class="flex-shrink-0" />
                     <span class="flex-grow overflow-hidden text-ellipsis text-nowrap text-start">
-                        Ordner erstellen
+                        {{ $t('folder.store._') }}
                     </span>
                 </button>
             </li>

@@ -7,12 +7,13 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Image } from '@/types/image';
 import { Head, useForm } from '@inertiajs/vue3';
+import { transChoice } from 'laravel-vue-i18n';
 
 const props = defineProps<{
     image: Image;
 }>();
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Images', href: '/images' },
+    { title: transChoice('image._', 0), href: '/images' },
     {
         title: props.image.name ?? 'Image',
         href: `/images/${props.image.id}`,
@@ -58,12 +59,14 @@ const form = useForm({
                     />
 
                     <div class="flex h-16 flex-row items-center justify-center gap-2">
-                        <button type="submit" class="button-primary h-10 rounded-md px-4 align-middle">Submit</button>
+                        <button type="submit" class="button-primary h-10 rounded-md px-4 align-middle">
+                            {{ $t('image.update._') }}
+                        </button>
                         <button
                             @click.prevent="form.delete(route('images.destroy', image.id))"
                             class="button-secondary h-10 rounded-md px-4 align-middle"
                         >
-                            Delete
+                            {{ $t('image.destroy._') }}
                         </button>
                         <DownloadButton :href="route('images.export', image.id)" />
                         <PresetButton v-model="form.iptc" />

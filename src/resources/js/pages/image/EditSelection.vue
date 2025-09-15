@@ -7,6 +7,7 @@ import MainLayout from '@/layouts/MainLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Image } from '@/types/image';
 import { Head, useForm } from '@inertiajs/vue3';
+import { trans, transChoice } from 'laravel-vue-i18n';
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -14,8 +15,8 @@ const props = defineProps<{ images: Image[] }>();
 const imageIds = props.images.map((image) => image.id);
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Images', href: route('images.index') },
-    { title: 'Edit Selection', href: route('images.edit-selection', { images: imageIds }) },
+    { title: transChoice('image._', 0), href: route('images.index') },
+    { title: trans('image.updateSelection._'), href: route('images.edit-selection', { images: imageIds }) },
 ];
 
 const initialFormValues = {
@@ -179,12 +180,14 @@ function handleSubmit() {
                     </div>
 
                     <div class="flex h-16 flex-row items-center justify-center gap-2">
-                        <button type="submit" class="button-primary h-10 rounded-md px-4">Submit</button>
+                        <button type="submit" class="button-primary h-10 rounded-md px-4">
+                            {{ $t('image.update._') }}
+                        </button>
                         <button
                             @click.prevent="form.delete(route('images.destroy-selection', { images: imageIds }))"
                             class="button-secondary h-10 rounded-md px-4"
                         >
-                            Delete
+                            {{ $t('image.destroy._') }}
                         </button>
                         <DownloadButton :href="route('images.export-selection', { images: imageIds })" />
                         <PresetButton v-model="form.iptc" />

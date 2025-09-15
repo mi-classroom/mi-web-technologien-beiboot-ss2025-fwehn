@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import IptcValuesList from '@/components/iptc/IptcValuesList.vue';
 import BaseModal from '@/components/ui/BaseModal.vue';
 import MainLayout from '@/layouts/MainLayout.vue';
 import { cn } from '@/lib/utils';
 import type { BreadcrumbItem } from '@/types';
 import { FolderOperation } from '@/types/enums';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { transChoice } from 'laravel-vue-i18n';
 import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 import { ref } from 'vue';
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Images', href: '/images' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: transChoice('image._', 0), href: '/images' }];
 const { images } = defineProps(['images']);
 
 const isDragging = ref(false);
@@ -131,7 +133,7 @@ const toggleSelection = (imageId: number, event?: MouseEvent) => {
                 <div
                     class="flex h-full w-full items-center justify-center rounded-xl border-4 border-dashed border-primary text-2xl font-semibold text-primary"
                 >
-                    Datei hierher ziehen zum Hochladen
+                    {{ $t('image.store.dropzone') }}
                 </div>
             </div>
 
@@ -216,10 +218,10 @@ const toggleSelection = (imageId: number, event?: MouseEvent) => {
                         fetchpriority="high"
                         loading="lazy"
                     />
-                    <div class="flex h-full w-full flex-col justify-center pl-4">
+                    <div class="flex h-full min-w-0 flex-1 flex-col justify-center pl-4">
                         <h1 class="text-xl font-semibold">{{ image.name }}</h1>
-                        <!--TODO-->
-                        <p>{{ image.iptc?.iptc_date_created ?? '-' }}</p>
+
+                        <IptcValuesList :iptc="image.iptc ?? {}" />
                     </div>
                     <div class="flex items-center justify-center px-8">
                         <span
@@ -251,25 +253,25 @@ const toggleSelection = (imageId: number, event?: MouseEvent) => {
         </form>
 
         <BaseModal :open="showModal" @cancel="close">
-            <h2 class="mb-4 text-lg font-bold">Sollen Ordner-Standards auf die neuen Bilder angewandt werden?</h2>
+            <h2 class="mb-4 text-lg font-bold">{{ $t('image.store.modal.title') }}</h2>
             <div class="flex flex-col gap-3">
                 <button
                     @click="confirmUpload(FolderOperation.SAVE)"
                     class="button-primary h-10 rounded-md px-4 align-middle"
                 >
-                    Bilder unverändert hochladen
+                    {{ $t('image.store.modal.actions.save') }}
                 </button>
                 <button
                     @click="confirmUpload(FolderOperation.PROPAGATE)"
                     class="button-primary h-10 rounded-md px-4 align-middle"
                 >
-                    Bilderdaten mit Ordner-Standards überschreiben
+                    {{ $t('image.store.modal.actions.propagate') }}
                 </button>
                 <button
                     @click="confirmUpload(FolderOperation.MERGE)"
                     class="button-primary h-10 rounded-md px-4 align-middle"
                 >
-                    Fehlende Bilderdaten mit Ordner-Standards besetzen
+                    {{ $t('image.store.modal.actions.merge') }}
                 </button>
                 <button
                     @click="
@@ -280,7 +282,7 @@ const toggleSelection = (imageId: number, event?: MouseEvent) => {
                     "
                     class="button-secondary h-10 w-full rounded-md px-4 align-middle"
                 >
-                    Abbrechen
+                    {{ $t('image.store.modal.actions.close') }}
                 </button>
             </div>
         </BaseModal>

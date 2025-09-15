@@ -8,31 +8,6 @@ const props = defineProps<{
     class?: HTMLAttributes['class'];
 }>();
 
-// type Options = {
-//     iptc_object_attribute_reference: boolean | null;
-//     iptc_object_name: boolean | null;
-//     iptc_subject_reference: boolean | null;
-//     iptc_keywords: boolean | null;
-//     iptc_special_instructions: boolean | null;
-//     iptc_date_created: boolean | null;
-//     iptc_time_created: boolean | null;
-//     iptc_byline: boolean | null;
-//     iptc_byline_title: boolean | null;
-//     iptc_city: boolean | null;
-//     iptc_sub_location: boolean | null;
-//     iptc_province_state: boolean | null;
-//     iptc_country_primary_location_code: boolean | null;
-//     iptc_country_primary_location_name: boolean | null;
-//     iptc_original_transmission_reference: boolean | null;
-//     iptc_headline: boolean | null;
-//     iptc_credit: boolean | null;
-//     iptc_source: boolean | null;
-//     iptc_copyright_notice: boolean | null;
-//     iptc_caption_abstract: boolean | null;
-//     iptc_writer_editor: boolean | null;
-//     iptc_application_record_version: boolean | null;
-// };
-
 const options = reactive({
     iptc_object_attribute_reference: null,
     iptc_object_name: null,
@@ -126,7 +101,7 @@ onMounted(() => {
                     }
                 "
             >
-                Anwenden
+                {{ $t('component.filter_dropdown.submit') }}
             </button>
         </div>
     </div>

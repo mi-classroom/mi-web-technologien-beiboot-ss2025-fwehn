@@ -22,7 +22,6 @@ class ImageController extends Controller
     public function index(Request $request)
     {
         $query = Image::query()
-            ->with(['iptc'])
             ->where('user_id', auth()->id())
             ->latest();
 
@@ -34,11 +33,15 @@ class ImageController extends Controller
             $query->whereNull('folder_id');
         }
 
-        $filterableFields = (new IptcDataEntry())->getFillable();
+        $iptcModel = new IptcDataEntry();
+        $filterableFields = $iptcModel->getFillable();
+        $casts = $iptcModel->getCasts();
+
+        $activeFilters = [];
 
         foreach ($request->all() as $field => $value) {
             if (in_array($field, $filterableFields, true)) {
-                $isArrayField = ((new IptcDataEntry())->getCasts()[$field] ?? null) === 'array';
+                $isArrayField = ($casts[$field] ?? null) === 'array';
 
                 if ($value === 'true' || $value === true) {
                     $query->whereHas('iptc', function ($q) use ($field, $isArrayField) {
@@ -50,6 +53,7 @@ class ImageController extends Controller
                             }
                         });
                     });
+                    $activeFilters[] = $field;
                 } elseif ($value === 'false' || $value === false) {
                     $query->where(function ($outer) use ($field, $isArrayField) {
                         $outer->whereHas('iptc', function ($q) use ($field, $isArrayField) {
@@ -62,9 +66,18 @@ class ImageController extends Controller
                             });
                         })->orDoesntHave('iptc');
                     });
+                    $activeFilters[] = $field;
                 }
             }
         }
+
+        $query->with(['iptc' => function ($q) use ($activeFilters, $iptcModel) {
+            if (!empty($activeFilters)) {
+                $q->select(array_merge(['id', 'iptcable_type', 'iptcable_id'], $activeFilters));
+            } else {
+                $q->select(array_merge(['id', 'iptcable_type', 'iptcable_id'], $iptcModel->getFillable()));
+            }
+        }]);
 
         $images = $query->get();
 
@@ -119,13 +132,13 @@ class ImageController extends Controller
         $operation = FolderOperation::tryFrom($validated["operation"]);
 
         if ($folder && !in_array($operation, [FolderOperation::SAVE, null])) {
-            $folderIPTC = $folder->iptc?->only($image->iptc()->getModel()->getFillable()) ?? [];
+            $folderIptc = $folder->iptc?->only((new IptcDataEntry())->getFillable()) ?? [];
 
             match ($operation) {
-                FolderOperation::PROPAGATE => $image->iptc()->update($folderIPTC),
-                FolderOperation::MERGE => $image->iptc()->update(array_filter(
-                    $folderIPTC,
-                    fn($key) => $image->iptc->$key === null,
+                FolderOperation::PROPAGATE => $image->iptc()->updateOrCreate([], $folderIptc),
+                FolderOperation::MERGE => $image->iptc()->updateOrCreate([], array_filter(
+                    $folderIptc,
+                    fn($key) => !$image->iptc?->$key,
                     ARRAY_FILTER_USE_KEY
                 )),
                 default => null
