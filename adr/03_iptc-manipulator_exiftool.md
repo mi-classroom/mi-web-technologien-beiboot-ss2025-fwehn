@@ -32,6 +32,12 @@ not enough for the intended use case.
 formats without altering image content. It supports IPTC, EXIF, and XMP metadata standards comprehensively and is widely
 adopted in the industry.
 
+### Note
+
+The IPTC manipulator, in combination with the reference image
+from [iptc.org](https://iptc.org/standards/photo-metadata/reference-images/), defined the IPTC fields that can be edited
+here.
+
 ## Consequences
 
 **Advantages:**

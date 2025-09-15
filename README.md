@@ -2,25 +2,7 @@
 
 # Web Technologien // begleitendes Projekt Sommersemester 2025
 
-Zum Modul Web Technologien gibt es ein begleitendes Projekt. Im Rahmen dieses Projekts werden wir von Veranstaltung zu
-Veranstaltung ein Projekt sukzessive weiter entwickeln und uns im Rahmen der Veranstaltung den Fortschritt anschauen,
-Code Reviews machen und Entwicklungsschritte vorstellen und diskutieren.
-
-Als organisatorischen Rahmen für das Projekt nutzen wir GitHub Classroom. Inhaltlich befassen wir uns mit einer
-Client-Server Anwendung mit deren Hilfe IPTC Metadaten von Bildern schnell und einfach gepflegt werden können.
-
-Dokumentieren Sie in diesem Beibootprojekt Ihre Entscheidungen gewissenhaft unter Zuhilfenahme
-von [Architectual Decision Records](https://adr.github.io) (ADR).
-
-Hier ein paar ADR Beispiele aus dem letzten Semestern:
-
-- https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2022-Moosgloeckchen/tree/main/docs/decisions
-- https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2022-mweiershaeuser/tree/main/adr
-- https://github.com/mi-classroom/mi-web-technologien-beiboot-ss2022-twobiers/tree/main/adr
-
-Halten Sie die Anwendung, gerade in der Anfangsphase möglichst einfach, schlank und leichtgewichtig (KISS).
-
-## Arbeitszeit pro Issue
+## Working time per issue
 
 | Issue                                                                                                                                                        | Arbeitszeit |
 |--------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------|
@@ -29,34 +11,58 @@ Halten Sie die Anwendung, gerade in der Anfangsphase möglichst einfach, schlank
 | [Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/3)                    | ~4h         |
 | [Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4) | ~80h        |
 | [Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)                                                                        | ~7h         |
-| [Finetuning & Doku](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/6)                                                                      | ~2.30h      |
-| **Gesamt**                                                                                                                                                   | **~110h**   |
+| [Finetuning & Doku](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/6)                                                                      | ~5.45h      |
+| **Total**                                                                                                                                                    | **~110h**   |
 
-Hinweis:
-Die Angabe
-zu "[Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4)"
-ist eine recht grobe Schätzung, da dieses Issue in vielen kleineren Sessions implementiert wurde und diese leider nicht
-alle erfasst wurden. Außerdem sind einige Stunden der
-Issues "[Upload via Web Frontend](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/2)"
-und "[Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)" dem jeweils vorangestellten
-Issue zugeordnet, da Teile dieser Issues bereits zu einem früheren Zeitpunkt implementiert wurden.
+***Note***:
+The estimate
+for "[Realisierung Ihres Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/4)"
+is rather rough, since this issue was implemented in many smaller sessions and unfortunately not all of them were
+recorded. In addition, some hours from the
+issues "[Upload via Web Frontend](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/2)"
+and "[Eigenes Feature](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/5)" are attributed to the
+preceding issue, since parts of these issues were already implemented at an earlier stage.
 
-# Installation
+## Installation
 
-Da für die Anwendung einige externe Tools und Bibliotheken installiert und PHP-Konfigurationen gesetzt werden müssten,
-ist die einfachste Möglichkeit um eine Demo laufen zu lassen [Docker](https://www.docker.com/).
-Dazu liegt im [``src``](./src) Verzeichnis sowohl ein [Dockerfile](./src/Dockerfile) als auch eine
-[ ``docker-compose.yml``](./src/docker-compose.yml).
+Since some external tools and libraries need to be installed for the application and PHP configurations need to be set,
+the easiest way to run a demo is [Docker](https://www.docker.com/).
+In the [`src`](./src) directory, you will find both a [Dockerfile](./src/Dockerfile) and a
+[`docker-compose.yml`](./src/docker-compose.yml).
 
-Um den Container korrekt zu starten, muss zunächst eine SQLite Datenbank erstellt werden:
-
-```shell
-cd src
-touch database/database.sqlite
-```
-
-Danach kann der Container gestartet werden:
+To start the container correctly, you first need to create an SQLite database:
 
 ```shell
-docker compose up -d --build
+    cd src
+    touch database/database.sqlite
 ```
+
+Then the container can be started:
+
+```shell
+    docker compose up -d --build
+```
+
+After that, the application is (by default) available at [http://localhost:8000](http://localhost:8000).
+The login credentials for the test user are:
+
+* Email: `test@example.com`
+* Password: `password`
+
+In the [`docker-compose.yml`](./src/docker-compose.yml) two commands are defined. One only starts the Laravel
+application, the other also resets the database.
+
+## Interaction Concept
+
+As part of the
+Issue "[Interaktionskonzept- und -design für die Bearbeitung von IPTC Daten](https://github.com/mi-classroom/mi-master-wt-beiboot-2025/issues/3)",
+an interaction concept was to be designed, which was then to be implemented later.
+In the concept for this application, 6 different screens were originally designed, most of which made it into the
+implementation.
+
+![Concept.png](assets/concept.jpg)
+
+The following features have not yet made it into the application:
+
+* Card-view of the images
+* Free text filter for filtering the images

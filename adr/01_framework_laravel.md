@@ -8,7 +8,7 @@ decision-makers: Finn Wehn
 
 ## Context and Problem Statement
 
-For the development of a new application, a programming language and ideally a framework was needed that offered easy
+For the development of the new application, a programming language and ideally a framework was needed that offered easy
 database integration, API functionalities, image management, and openness for the integration of external tools or
 plugins.
 
@@ -30,9 +30,7 @@ plugins.
 
 **Chosen option:** **PHP + Laravel**, because it meets all functional requirements, leverages existing knowledge, and
 enables a quick project start. Laravel provides a complete framework with built-in solutions for authentication,
-routing,
-database integration, and API development. The documentation is extensive and the community is large, which further
-facilitates development.
+routing, database integration, and API development.
 
 ## Consequences
 
